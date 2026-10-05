@@ -1,6 +1,6 @@
 # Briefing — Fôlego, app de finanças pessoais (Android)
 
-Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) e sobre o limite manual em semana partida (RN12).
+Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) e sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04).
 
 ## Visão geral
 
@@ -76,13 +76,13 @@ Todos os termos são do ciclo atual, em centavos.
 
 **Ciclo**
 
-- **RN01** — O ciclo começa no **dia do pagamento**, configurável (padrão: dia 1), e termina na véspera do próximo. Se o dia do pagamento mudar, o ciclo atual termina na véspera da próxima ocorrência do novo dia depois de hoje (ex.: mudar de 1 para 15 em 10/10 faz o ciclo atual terminar em 14/10).
+- **RN01** — O ciclo começa no **dia do pagamento**, configurável (padrão: dia 1), e termina na véspera do próximo. Se o dia do pagamento mudar, o ciclo atual termina na véspera da próxima ocorrência do novo dia depois de hoje (ex.: mudar de 1 para 15 em 10/10 faz o ciclo atual terminar em 14/10). Se o novo dia for o próprio dia de hoje, o ciclo atual termina ontem e um ciclo novo começa hoje (ex.: mudar de 1 para 15 em 15/10 fecha o ciclo em 14/10 e abre outro em 15/10).
 - **RN02** — Se o dia configurado não existe no mês (ex.: 31 em abril), o ciclo começa no último dia daquele mês.
 
 **Contas fixas**
 
-- **RN03** — Uma conta fixa com duração de N meses está ativa nos N ciclos a partir do ciclo de início, inclusive. Depois disso, é encerrada automaticamente e para de ser descontada.
-- **RN04** — Conta com duração "sem fim" fica ativa até o usuário encerrá-la manualmente.
+- **RN03** — Uma conta fixa com duração de N meses está ativa nos N ciclos a partir do ciclo de início, inclusive. Depois disso, é encerrada automaticamente e para de ser descontada. Os ciclos são contados pelo mês em que começam: com 3 meses a partir de outubro, a conta vale em todo ciclo que começa em outubro, novembro ou dezembro. Se uma mudança do dia do pagamento (RN01) criar dois ciclos no mesmo mês, a conta é descontada nos dois, assim como o salário entra nos dois.
+- **RN04** — Conta com duração "sem fim" fica ativa até o usuário encerrá-la manualmente. Uma conta encerrada no meio de um ciclo ainda é descontada nele e sai a partir do ciclo seguinte, a favor da segurança, porque a conta daquele ciclo pode já ter sido paga.
 - **RN05** — Editar o valor de uma conta afeta o ciclo atual e os futuros, nunca ciclos já fechados.
 
 **Reserva e meta de investimento**
