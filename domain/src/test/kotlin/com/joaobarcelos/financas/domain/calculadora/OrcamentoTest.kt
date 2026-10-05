@@ -59,6 +59,16 @@ class OrcamentoTest {
     }
 
     @Test
+    fun `RN03 mudanca de 31 para 1 que pula fevereiro desconta a conta uma vez a menos`() {
+        // limitação aceita pelo dono (P15): os ciclos 31/01-28/02 e 01/03-31/03 pulam fevereiro
+        val conta = ContaFixa(10_000, cicloInicio = data(31, 12), duracaoMeses = 3)
+        val janeiro = mudarDiaPagamento(cicloDe(data(5, 2, 2027), 31), 1, hoje = data(5, 2, 2027)).atual
+        assertEquals(Ciclo(data(31, 1, 2027), data(28, 2, 2027)), janeiro)
+        val ciclos = listOf(cicloDe(data(31, 12), 31), janeiro, cicloDe(janeiro.fim.plusDays(1), 1))
+        assertEquals(listOf(true, true, false), ciclos.map { conta.ativaEm(it) })
+    }
+
+    @Test
     fun `RN04 conta sem fim continua ativa anos depois`() {
         assertTrue(aluguel.ativaEm(ciclo(10, 2036)))
     }
@@ -139,10 +149,12 @@ class OrcamentoTest {
     }
 
     @Test
-    fun `RN07 entrada recorrente vale do ciclo de inicio ate o ciclo de fim`() {
+    fun `RN07 entrada recorrente vale nos ciclos que comecam entre o inicio e o fim`() {
+        // decisão do dono (P13): emprego novo a partir de 20/10 só conta a partir do pagamento de 01/11
         val salario = Entrada(300_000, TipoEntrada.RECORRENTE, dataInicio = data(20, 10), dataFim = data(5, 12))
         assertFalse(salario.entraEm(ciclo(9)))
-        assertTrue(salario.entraEm(ciclo(10)))
+        assertFalse(salario.entraEm(ciclo(10)))
+        assertTrue(salario.entraEm(ciclo(11)))
         assertTrue(salario.entraEm(ciclo(12)))
         assertFalse(salario.entraEm(ciclo(1, 2027)))
     }
@@ -187,6 +199,18 @@ class OrcamentoTest {
         val resumo = comGastos(Gasto(100_000, data(2, 10)), Gasto(70_000, data(20, 10))).resumo(outubro)
         assertEquals(-20_000, resumo.disponivel)
         assertEquals(20_000, resumo.reservaInvadida)
+    }
+
+    @Test
+    fun `RN09 sem gastos nao ha reserva invadida mesmo com metas que nao cabem`() {
+        // decisão do dono (P12): conta nova deixa o disponível em -200 sem gasto nenhum; é o aviso da RN08
+        val semFolga = base.copy(contas = base.contas + ContaFixa(170_000, cicloInicio = data(1, 10)))
+        val resumo = semFolga.resumo(outubro)
+        assertEquals(-20_000, resumo.disponivel)
+        assertEquals(0, resumo.reservaInvadida)
+        assertEquals(20_000, resumo.faltaParaMetas)
+        // um gasto de 50 nesse ciclo invade só os 50 que ele tirou
+        assertEquals(5_000, semFolga.copy(gastos = listOf(Gasto(5_000, data(5, 10)))).resumo(outubro).reservaInvadida)
     }
 
     @Test

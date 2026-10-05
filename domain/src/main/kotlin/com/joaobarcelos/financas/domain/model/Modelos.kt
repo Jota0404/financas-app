@@ -13,8 +13,8 @@ data class Ciclo(val inicio: LocalDate, val fim: LocalDate) {
 enum class TipoEntrada { RECORRENTE, AVULSA }
 
 /**
- * Recorrente entra em todo ciclo de [dataInicio] até [dataFim] (nulo = sem fim), inclusive nos
- * ciclos em que essas datas caem. Avulsa entra só no ciclo de [dataInicio].
+ * Recorrente entra nos ciclos cujo primeiro dia cai entre [dataInicio] e [dataFim] (nulo = sem fim).
+ * Avulsa entra só no ciclo de [dataInicio].
  */
 data class Entrada(
     val valorCentavos: Long,

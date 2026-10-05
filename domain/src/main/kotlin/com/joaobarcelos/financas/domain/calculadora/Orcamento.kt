@@ -35,17 +35,20 @@ data class Resumo(val entradas: Long, val fixas: Long, val reserva: Long, val ga
     /** RN07: a reserva sai antes dos gastos e nunca aparece como disponível. */
     val disponivel: Long get() = entradas - fixas - reserva - gastos
 
-    /** RN09: quanto o disponível ficou negativo, mesmo que passe do total da reserva. */
-    val reservaInvadida: Long get() = maxOf(0L, -disponivel)
+    /**
+     * RN09: quanto os gastos tiraram da reserva: o quanto o disponível ficou negativo, mesmo que
+     * passe do total da reserva, até o total de gastos. Sem gastos, a falta é o aviso da RN08.
+     */
+    val reservaInvadida: Long get() = minOf(gastos, maxOf(0L, -disponivel))
 
     /** RN08: quanto falta para as metas caberem em Entradas − Contas fixas (0 quando cabem). */
     val faltaParaMetas: Long get() = maxOf(0L, reserva - (entradas - fixas))
 }
 
-/** Recorrente: todo ciclo que encosta em [dataInicio, dataFim]. Avulsa: só o ciclo da data. */
+/** Recorrente: ciclos cujo primeiro dia cai entre [dataInicio] e [dataFim]. Avulsa: só o ciclo da data. */
 fun Entrada.entraEm(ciclo: Ciclo): Boolean = when (tipo) {
     TipoEntrada.AVULSA -> dataInicio in ciclo
-    TipoEntrada.RECORRENTE -> dataInicio <= ciclo.fim && (dataFim == null || dataFim >= ciclo.inicio)
+    TipoEntrada.RECORRENTE -> ciclo.inicio >= dataInicio && (dataFim == null || ciclo.inicio <= dataFim)
 }
 
 /**
