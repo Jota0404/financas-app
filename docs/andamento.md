@@ -65,7 +65,9 @@ Por enquanto, o GitHub Actions só confirma que o projeto monta sem erro.
   nuvem do app), e o domínio passou a ser o módulo `:domain`.
 - Decisões do dono sobre as propostas do QA (P1 a P10), registradas no briefing: a RN08 soma todas
   as metas (CA04 agora diz R$ 500,00); o limite semanal passa a ser proporcional aos dias que
-  faltam no ciclo (RN11; CA05 agora R$ 388,88 e CA08 R$ 272,22); novos CA13 a CA15. A P11 (onde
+  faltam no ciclo (RN11; CA05 agora R$ 388,88 e CA08 R$ 272,22); novos CA13 a CA15. Depois, o
+  limite manual (RN12) também passou a ser proporcional nas semanas partidas do começo e do fim
+  do ciclo (novo CA16: R$ 500,00 viram R$ 285,71 de 01 a 04/10). A P11 (onde
   ficam as interfaces dos repositórios) fica a critério do desenvolvedor na Etapa 3.
 - O GitHub avisou que o runner `ubuntu-latest` passa para o Ubuntu 26 a partir de 19/10/2026.
   Não exige ação agora: vale conferir se os testes continuam passando depois dessa data.

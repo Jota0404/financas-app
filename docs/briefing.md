@@ -1,6 +1,6 @@
 # Briefing — App de Finanças Pessoais (Android)
 
-Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10).
+Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) e sobre o limite manual em semana partida (RN12).
 
 ## Visão geral
 
@@ -96,7 +96,7 @@ Todos os termos são do ciclo atual, em centavos.
 
 - **RN10** — A semana vai de segunda a domingo.
 - **RN11** — Limite automático da semana = disponível no momento do cálculo × dias da semana dentro do ciclo ÷ dias que faltam no ciclo, contando o dia do cálculo. A multiplicação vem antes da divisão, e a divisão arredonda para baixo (RN13). O cálculo acontece na segunda às 00:00, ou no primeiro dia do ciclo quando ele começa no meio da semana, e o valor fica fixo até o fim da semana ou do ciclo, o que vier antes. Se o disponível for zero ou negativo, o limite é R$ 0,00. Exemplo: ciclo de 01 a 31/10/2026 com R$ 1.500,00 disponíveis; de quinta 01/10 a domingo 04/10, o limite é R$ 1.500,00 × 4 ÷ 31 = R$ 193,54.
-- **RN12** — O usuário pode definir um limite manual. Se ele for maior que o automático, o app avisa que o ritmo não fecha o ciclo, mas aceita.
+- **RN12** — O usuário pode definir um limite manual, que vale para uma semana cheia (7 dias). Quando só parte da semana está dentro do ciclo (no começo ou no fim dele), o limite manual é proporcional aos dias dentro do ciclo: valor × dias ÷ 7, com a divisão arredondando para baixo (RN13). Se o limite manual da semana for maior que o automático da mesma semana, o app avisa que o ritmo não fecha o ciclo, mas aceita. Exemplo: limite manual de R$ 500,00; de quinta 01/10 a domingo 04/10/2026, o limite é R$ 500,00 × 4 ÷ 7 = R$ 285,71.
 - **RN13** — Divisões em centavos sempre arredondam **para baixo**, a favor da segurança. Exceção: o valor de uma meta em percentual arredonda **para cima**, para nunca reservar menos do que o percentual.
 
 **Gastos**
@@ -221,6 +221,7 @@ Os casos usam o mesmo cenário base, salvo quando a situação diz outra coisa. 
 | CA13 | RN11 | Quinta, 01/10/2026 (primeiro dia do ciclo), sem gastos | Limite de 01 a 04/10 = R$ 193,54 (R$ 1.500,00 × 4 ÷ 31) |
 | CA14 | RN11 | Segunda, 05/10/2026, com o gasto do CA03 feito entre 01 e 04/10 (disponível −R$ 100,00) | Limite semanal = R$ 0,00 |
 | CA15 | RN13 | Salário de R$ 3.000,05 com a meta de 10% | Reserva = R$ 300,01 (arredonda para cima) |
+| CA16 | RN12 | Limite manual de R$ 500,00; quinta, 01/10/2026 (primeiro dia do ciclo), sem gastos | Limite de 01 a 04/10 = R$ 285,71 (R$ 500,00 × 4 ÷ 7); app avisa que o ritmo não fecha o ciclo, porque o automático é R$ 193,54 (CA13) |
 
 Critérios gerais: o app não fecha sozinho em nenhum fluxo, funciona sem internet, e os dados sobrevivem a fechar o app e reiniciar o celular.
 
