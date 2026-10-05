@@ -15,25 +15,48 @@ Pacote base: `com.joaobarcelos.financas`.
 - Em caso de dúvida ou conflito entre o pedido e o briefing, perguntar antes de seguir.
 - **Nunca mudar uma regra de negócio** sem avisar o dono e sem atualizar o `docs/briefing.md`
   na mesma entrega.
+- Antes de começar uma etapa, ler o relatório mais recente do QA em `docs/qa/`.
 
 ## Forma de trabalhar
 
 - Trabalhar **uma etapa do "Roteiro de construção" por vez**.
 - Ao final de cada etapa, **parar** e esperar a aprovação do dono antes de começar a próxima.
-- Não avançar de etapa com bug crítico aberto pelo QA na etapa anterior.
+- Não avançar de etapa com item **Crítico** ou **Alto** aberto no último relatório do QA
+  (severidades no "Protocolo de entrega ao QA" do briefing).
+- Ao concluir uma etapa ou corrigir itens do QA, atualizar `docs/andamento.md` no mesmo push.
 
 ## Regras técnicas obrigatórias
 
 - **Dinheiro sempre em centavos, tipo `Long`.** Nunca `Double` ou `Float`.
 - Percentuais em pontos-base (`Int`, 1000 = 10%), conforme o briefing.
+- Divisão de centavos com `Math.floorDiv` (RN13): o `/` do Kotlin arredonda negativos para
+  cima (`-10000 / 3` dá `-3333`, não `-3334`).
 - Todo o domínio fica no módulo **`:domain`**, que **não pode depender do Android**
   (nenhum `import android.*`, nenhuma biblioteca Android, nenhuma dependência de `:app`).
+- O `:domain` nunca chama `LocalDate.now()` nem lê o relógio do sistema: a data de hoje
+  chega como parâmetro.
 - Respeitar a direção das camadas: ui → domain → data. Tela nunca acessa banco direto.
 
 ## Testes
 
 - Cada regra de negócio (**RN**) e cada critério de aceite (**CA**) do briefing deve ter
-  **teste unitário**, com o código no nome do teste.
+  **teste automatizado**, com o código no nome do teste: unitário para cálculo; instrumentado
+  ou de interface só quando a regra depende do Android (hoje: RN16 e CA12).
   Exemplo: `` `RN13 divisao em centavos arredonda para baixo`() ``,
   `` `CA06 limite de 1000 reais em 3 semanas e 333,33`() ``.
 - Testes do domínio ficam em `domain/src/test/kotlin/com/joaobarcelos/financas/domain/`.
+- Em `app/src/androidTest`, nome de teste **sem espaço** (com minSdk 26 o build quebra):
+  `` `CA12_registrar_gasto_em_ate_3_toques`() ``.
+- Antes de cada push, `./gradlew assembleDebug test` deve passar; depois, conferir o
+  GitHub Actions do commit. Neste Mac não há Java no PATH: rodar o Gradle com
+  `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
+
+## Plugin Ponytail
+
+- Usar o plugin Ponytail ao implementar, sempre que couber: a solução mais simples que
+  funciona, com biblioteca padrão e recursos nativos antes de código próprio ou dependência nova.
+- Todo atalho do Ponytail fica marcado no código com um comentário `ponytail:` dizendo o que
+  foi simplificado e quando revisar. Ex.: `// ponytail: busca linear; usar índice se passar de 1.000 gastos`.
+  O `/ponytail-debt` lista todos.
+- **O briefing vence o Ponytail:** nunca cortar testes de RN e CA, validações, tratamento de
+  erro ou requisitos do briefing para reduzir código.
