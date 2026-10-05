@@ -21,7 +21,7 @@ A especificação completa está em [`docs/briefing.md`](docs/briefing.md).
 financas-app/
 ├── docs/
 │   └── briefing.md            especificação oficial do app (regras RN, critérios CA)
-├── app/src/main/java/com/joaobarcelos/financas/
+├── app/src/main/java/com/joaobarcelos/financas/   módulo :app (Android)
 │   ├── ui/                    telas e ViewModels, uma pasta por funcionalidade
 │   │   ├── inicio/            tela inicial (disponível da semana e do ciclo)
 │   │   ├── gastos/            registro de novo gasto
@@ -30,10 +30,6 @@ financas-app/
 │   │   ├── configuracoes/     dia do pagamento, limites e alertas
 │   │   ├── onboarding/        assistente de primeiro uso
 │   │   └── theme/             cores, fontes e tema do app
-│   ├── domain/                regras de negócio em Kotlin puro (sem Android)
-│   │   ├── model/             modelos do domínio (Entrada, ContaFixa, Gasto...)
-│   │   ├── usecase/           casos de uso (ações do app)
-│   │   └── calculadora/       cálculos de ciclo, reserva, disponível e limite semanal
 │   ├── data/                  acesso a dados
 │   │   ├── local/entity/      tabelas do Room
 │   │   ├── local/dao/         consultas ao banco (DAOs)
@@ -42,8 +38,13 @@ financas-app/
 │   ├── worker/                agendamento e disparo dos alertas (WorkManager)
 │   └── di/                    módulos do Hilt
 ├── app/src/test/java/com/joaobarcelos/financas/
-│   ├── domain/                testes unitários das regras (mesma estrutura do main)
 │   └── data/                  testes de persistência (mesma estrutura do main)
+├── domain/                    módulo :domain, regras de negócio em Kotlin puro (sem Android)
+│   ├── src/main/kotlin/com/joaobarcelos/financas/domain/
+│   │   ├── model/             modelos do domínio (Entrada, ContaFixa, Gasto...)
+│   │   ├── usecase/           casos de uso (ações do app)
+│   │   └── calculadora/       cálculos de ciclo, reserva, disponível e limite semanal
+│   └── src/test/kotlin/...    testes unitários das regras (mesma estrutura do main)
 ├── CLAUDE.md                  regras de trabalho para o assistente de desenvolvimento
 └── README.md
 ```
