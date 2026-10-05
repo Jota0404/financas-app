@@ -45,7 +45,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -54,5 +53,4 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
 }
