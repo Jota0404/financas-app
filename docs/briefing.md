@@ -1,6 +1,6 @@
 # Briefing — Fôlego, app de finanças pessoais (Android)
 
-Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) e sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04).
+Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16).
 
 ## Visão geral
 
@@ -81,7 +81,7 @@ Todos os termos são do ciclo atual, em centavos.
 
 **Contas fixas**
 
-- **RN03** — Uma conta fixa com duração de N meses está ativa nos N ciclos a partir do ciclo de início, inclusive. Depois disso, é encerrada automaticamente e para de ser descontada. Os ciclos são contados pelo mês em que começam: com 3 meses a partir de outubro, a conta vale em todo ciclo que começa em outubro, novembro ou dezembro. Se uma mudança do dia do pagamento (RN01) criar dois ciclos no mesmo mês, a conta é descontada nos dois, assim como o salário entra nos dois.
+- **RN03** — Uma conta fixa com duração de N meses está ativa nos N ciclos a partir do ciclo de início, inclusive. Depois disso, é encerrada automaticamente e para de ser descontada. Os ciclos são contados pelo mês em que começam: com 3 meses a partir de outubro, a conta vale em todo ciclo que começa em outubro, novembro ou dezembro. Se uma mudança do dia do pagamento (RN01) criar dois ciclos no mesmo mês, a conta é descontada nos dois, assim como o salário entra nos dois. Limitação conhecida e aceita: uma mudança do fim para o começo do mês pode pular um mês (ex.: de 31 para 1 em 05/02/2027 gera os ciclos 31/01–28/02 e 01/03–31/03, e nenhum começa em fevereiro), e aí a conta é descontada uma vez a menos.
 - **RN04** — Conta com duração "sem fim" fica ativa até o usuário encerrá-la manualmente. Uma conta encerrada no meio de um ciclo ainda é descontada nele e sai a partir do ciclo seguinte, a favor da segurança, porque a conta daquele ciclo pode já ter sido paga.
 - **RN05** — Editar o valor de uma conta afeta o ciclo atual e os futuros, nunca ciclos já fechados.
 
@@ -90,12 +90,12 @@ Todos os termos são do ciclo atual, em centavos.
 - **RN06** — Cada meta de reserva tem nome, tipo (valor fixo em R$ ou percentual das entradas do ciclo) e valor. Pode haver mais de uma (ex.: "Reserva de segurança" e "Investimento").
 - **RN07** — A reserva é descontada **antes** dos gastos variáveis e não aparece como disponível em nenhuma tela.
 - **RN08** — Ao salvar uma meta, se Entradas − Contas fixas < soma de todas as metas ativas (incluindo a que está sendo salva), o app bloqueia o salvamento e mostra quanto falta para a meta ser viável. Ao salvar uma conta fixa ou uma entrada que deixe as metas maiores que Entradas − Contas fixas, o app salva, mas avisa quanto falta.
-- **RN09** — Um gasto que deixa o disponível negativo é registrado mesmo assim (o dinheiro já saiu), mas o ciclo fica marcado como **reserva invadida**, com o valor invadido (quanto o disponível ficou negativo, mesmo que passe do total da reserva), e dispara o alerta A4.
+- **RN09** — Um gasto que deixa o disponível negativo é registrado mesmo assim (o dinheiro já saiu), mas o ciclo fica marcado como **reserva invadida**, com o valor invadido (quanto o disponível ficou negativo, mesmo que passe do total da reserva), e dispara o alerta A4. O valor invadido é o quanto os gastos tiraram da reserva: o menor entre o total de gastos do ciclo e o quanto o disponível ficou negativo. Sem gastos, não há reserva invadida; a falta causada por metas que não cabem é o aviso da RN08.
 
 **Limite semanal**
 
 - **RN10** — A semana vai de segunda a domingo.
-- **RN11** — Limite automático da semana = disponível no momento do cálculo × dias da semana dentro do ciclo ÷ dias que faltam no ciclo, contando o dia do cálculo. A multiplicação vem antes da divisão, e a divisão arredonda para baixo (RN13). O cálculo acontece na segunda às 00:00, ou no primeiro dia do ciclo quando ele começa no meio da semana, e o valor fica fixo até o fim da semana ou do ciclo, o que vier antes. Se o disponível for zero ou negativo, o limite é R$ 0,00. Exemplo: ciclo de 01 a 31/10/2026 com R$ 1.500,00 disponíveis; de quinta 01/10 a domingo 04/10, o limite é R$ 1.500,00 × 4 ÷ 31 = R$ 193,54.
+- **RN11** — Limite automático da semana = disponível no momento do cálculo × dias da semana dentro do ciclo ÷ dias que faltam no ciclo, contando o dia do cálculo. A multiplicação vem antes da divisão, e a divisão arredonda para baixo (RN13). O cálculo acontece na segunda às 00:00, ou no primeiro dia do ciclo quando ele começa no meio da semana, e o valor fica fixo até o fim da semana ou do ciclo, o que vier antes. Se o disponível for zero ou negativo, o limite é R$ 0,00. Exemplo: ciclo de 01 a 31/10/2026 com R$ 1.500,00 disponíveis; de quinta 01/10 a domingo 04/10, o limite é R$ 1.500,00 × 4 ÷ 31 = R$ 193,54. "Fixo" quer dizer que os gastos da própria semana não reduzem o limite. Mudanças nos cadastros (entradas, contas fixas e metas) e gastos retroativos de semanas anteriores (RN14) recalculam o limite.
 - **RN12** — O usuário pode definir um limite manual, que vale para uma semana cheia (7 dias). Quando só parte da semana está dentro do ciclo (no começo ou no fim dele), o limite manual é proporcional aos dias dentro do ciclo: valor × dias ÷ 7, com a divisão arredondando para baixo (RN13). Se o limite manual da semana for maior que o automático da mesma semana, o app avisa que o ritmo não fecha o ciclo, mas aceita. Exemplo: limite manual de R$ 500,00; de quinta 01/10 a domingo 04/10/2026, o limite é R$ 500,00 × 4 ÷ 7 = R$ 285,71.
 - **RN13** — Divisões em centavos sempre arredondam **para baixo**, a favor da segurança. Exceção: o valor de uma meta em percentual arredonda **para cima**, para nunca reservar menos do que o percentual.
 
@@ -126,7 +126,7 @@ Sete tabelas no Room e um arquivo de configurações no DataStore. Valores em ce
 
 | Entidade | Campos | Observações |
 | --- | --- | --- |
-| Entrada | id, descricao, valorCentavos, tipo (RECORRENTE / AVULSA), dataInicio, dataFim? | Recorrente entra em todo ciclo a partir de dataInicio; avulsa só no ciclo da sua data |
+| Entrada | id, descricao, valorCentavos, tipo (RECORRENTE / AVULSA), dataInicio, dataFim? | Recorrente entra nos ciclos cujo primeiro dia cai entre dataInicio e dataFim, inclusive (a favor da segurança: um salário novo só conta a partir do primeiro pagamento); no primeiro uso, a dataInicio do salário é o início do ciclo atual. Avulsa só no ciclo da sua data |
 | ContaFixa | id, descricao, valorCentavos, diaVencimento, cicloInicio, duracaoMeses?, encerradaEm? | duracaoMeses nulo = sem fim (RN04) |
 | Gasto | id, descricao, valorCentavos, data, categoriaId, criadoEm | categoriaId é chave estrangeira |
 | Categoria | id, nome, icone | Vem com categorias padrão (Alimentação, Transporte, Lazer, Saúde, Outros) |
@@ -134,7 +134,7 @@ Sete tabelas no Room e um arquivo de configurações no DataStore. Valores em ce
 | CicloFechado | id, inicio, fim, totalEntradas, totalFixas, totalReserva, totalGastos, reservaInvadidaCentavos | Retrato do ciclo no fechamento; garante a RN05 |
 | RegistroAlerta | id, codigo, periodoRef, disparadoEm | Impede alerta duplicado no mesmo período |
 
-**Configurações (DataStore):** diaPagamento, limiteSemanalManual?, percentualAtencao, percentualCritico, horaResumo.
+**Configurações (DataStore):** diaPagamento, inicioCicloAtual?, fimCicloAtual?, limiteSemanalManual?, percentualAtencao, percentualCritico, horaResumo. `inicioCicloAtual` e `fimCicloAtual` guardam o ciclo atual quando uma mudança do dia do pagamento (RN01) o deixa diferente do normal; depois do `fimCicloAtual`, o ciclo volta a sair só do `diaPagamento`. Só o início não basta: mudar de 1 para 15 em 10/10 ou em 20/10 dá ciclos que começam em 01/10 e terminam em 14/10 ou em 14/11.
 
 Campos com **?** são opcionais (nuláveis).
 
