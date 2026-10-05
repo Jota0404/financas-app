@@ -47,9 +47,16 @@ Pacote base: `com.joaobarcelos.financas`.
 - Testes do domínio ficam em `domain/src/test/kotlin/com/joaobarcelos/financas/domain/`.
 - Em `app/src/androidTest`, nome de teste **sem espaço** (com minSdk 26 o build quebra):
   `` `CA12_registrar_gasto_em_ate_3_toques`() ``.
-- Antes de cada push, `./gradlew assembleDebug test` deve passar; depois, conferir o
-  GitHub Actions do commit. Neste Mac não há Java no PATH: rodar o Gradle com
-  `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
+- Antes de cada push, rodar `/verificar` (build, testes e GitHub Actions). Gradle à mão neste Mac
+  precisa de `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
+
+## Skills do projeto
+
+Ficam em `.claude/skills/` e servem ao desenvolvedor e ao agente de QA:
+
+- `/verificar`: compila, roda os testes de todos os módulos e mostra o GitHub Actions do commit.
+- `/testar-emulador`: abre o app no emulador (tema claro e escuro), tira prints e procura travamentos.
+- `/cobertura-rn-ca`: lista quais RN e CA do briefing já têm teste e os casos de borda que faltam.
 
 ## Plugin Ponytail
 
