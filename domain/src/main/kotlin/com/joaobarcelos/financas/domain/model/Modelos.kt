@@ -2,6 +2,9 @@ package com.joaobarcelos.financas.domain.model
 
 import java.time.LocalDate
 
+// ponytail: os modelos só têm os campos que os cálculos usam; id, descrição, categoria, nome da meta
+// e dia de vencimento do modelo de dados do briefing entram na Etapa 3, junto com as tabelas do Room.
+
 /** Período entre dois pagamentos, de [inicio] a [fim], os dois inclusive (RN01). */
 data class Ciclo(val inicio: LocalDate, val fim: LocalDate) {
     operator fun contains(data: LocalDate) = data >= inicio && data <= fim
