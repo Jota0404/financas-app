@@ -7,7 +7,9 @@ import com.joaobarcelos.financas.domain.model.Ciclo
 import com.joaobarcelos.financas.domain.model.Configuracoes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -29,8 +31,9 @@ class DataStoreConfiguracoesRepositoryTest {
     private val escopos = mutableListOf<CoroutineScope>()
 
     /** Abre o arquivo como o app faria ao iniciar. Só um DataStore pode ficar aberto por arquivo. */
-    private fun abrir(): DataStoreConfiguracoesRepository {
-        escopos.forEach { it.cancel() }
+    private suspend fun abrir(): DataStoreConfiguracoesRepository {
+        // espera o anterior fechar de vez; só cancelar deixa o arquivo preso por um instante
+        escopos.forEach { it.coroutineContext[Job]!!.cancelAndJoin() }
         val escopo = CoroutineScope(Dispatchers.IO + SupervisorJob()).also { escopos += it }
         return DataStoreConfiguracoesRepository(PreferenceDataStoreFactory.create(scope = escopo) { arquivo })
     }
