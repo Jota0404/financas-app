@@ -13,6 +13,8 @@ Pacote base: `com.joaobarcelos.financas`.
 
 - Ler `docs/briefing.md` **antes de qualquer tarefa**. Ele é a especificação oficial do app.
 - Em caso de dúvida ou conflito entre o pedido e o briefing, perguntar antes de seguir.
+- Regra ambígua no briefing: perguntar ao dono **antes de implementar** e registrar a decisão no
+  briefing. Não deixar a escolha só como "dúvida" na mensagem de entrega.
 - **Nunca mudar uma regra de negócio** sem avisar o dono e sem atualizar o `docs/briefing.md`
   na mesma entrega.
 - Antes de começar uma etapa, ler o relatório mais recente do QA em `docs/qa/`.
@@ -36,6 +38,8 @@ Pacote base: `com.joaobarcelos.financas`.
 - O `:domain` nunca chama `LocalDate.now()` nem lê o relógio do sistema: a data de hoje
   chega como parâmetro.
 - Respeitar a direção das camadas: ui → domain → data. Tela nunca acessa banco direto.
+- Toda decisão de regra de negócio (bloquear, avisar, fechar ciclo) sai pronta do `:domain`, com
+  teste. Tela e repositórios só aplicam o resultado, sem "quem chama precisa lembrar de...".
 
 ## Testes
 
