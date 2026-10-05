@@ -2,6 +2,8 @@
 
 App Android offline que responde, toda semana: quanto posso gastar sem comprometer as contas fixas e a reserva?
 
+Repositório: https://github.com/Jota0404/financas-app
+
 ## Stack
 
 - **Kotlin** — linguagem
