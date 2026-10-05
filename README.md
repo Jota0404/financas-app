@@ -14,13 +14,15 @@ Repositório: https://github.com/Jota0404/financas-app
 - **Hilt** — injeção de dependência
 
 A especificação completa está em [`docs/briefing.md`](docs/briefing.md).
+O andamento atual do projeto está em [`docs/andamento.md`](docs/andamento.md).
 
 ## Estrutura de pastas
 
 ```text
 financas-app/
 ├── docs/
-│   └── briefing.md            especificação oficial do app (regras RN, critérios CA)
+│   ├── briefing.md            especificação oficial do app (regras RN, critérios CA)
+│   └── andamento.md           em que etapa o projeto está e o que já foi feito
 ├── app/src/main/java/com/joaobarcelos/financas/   módulo :app (Android)
 │   ├── ui/                    telas e ViewModels, uma pasta por funcionalidade
 │   │   ├── inicio/            tela inicial (disponível da semana e do ciclo)
