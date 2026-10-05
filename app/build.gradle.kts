@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
 }
 
 android {
@@ -36,6 +37,17 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        // Robolectric: os testes do Room e do DataStore rodam no computador, sem aparelho
+        unitTests.isIncludeAndroidResources = true
+        // O Robolectric simula o Android 16+ acessando uma parte interna do Java
+        unitTests.all { it.jvmArgs("--add-opens=java.base/jdk.internal.access=ALL-UNNAMED") }
+    }
+}
+
+room {
+    // Esquema do banco versionado no Git, para escrever as migrações das próximas versões
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
@@ -48,7 +60,14 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.datastore.preferences)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
