@@ -2,7 +2,8 @@
 
 Atualizado em 05/10/2026.
 
-**Etapa atual:** 2 de 7 (Domínio), em andamento. A limpeza pedida pelo QA na Etapa 1 já foi feita.
+**Etapa atual:** 2 de 7 (Domínio) concluída e entregue ao QA. Aguarda a revisão do QA e a aprovação
+do dono antes da Etapa 3.
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -11,7 +12,7 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | Etapa | Situação |
 | --- | --- |
 | 1. Setup | ✅ Concluída e aprovada em 05/10/2026 |
-| 2. Domínio (só Kotlin puro, RN01 a RN15) | 🔨 Em andamento |
+| 2. Domínio (só Kotlin puro, RN01 a RN15) | 🔍 Concluída em 05/10/2026, aguardando QA e aprovação |
 | 3. Persistência (Room, DAOs, DataStore) | ⏳ Não iniciada |
 | 4. Cadastros | ⏳ Não iniciada |
 | 5. Gastos e Início | ⏳ Não iniciada |
@@ -41,6 +42,18 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 **Resultado verificado:** o app compila e abre uma tela vazia num celular físico (Galaxy A56),
 seguindo o tema claro ou escuro do aparelho, sem erros.
 
+## O que já existe (Etapa 2)
+
+Os cálculos do app, no módulo `:domain`, sem banco e sem tela (ainda não aparecem no app):
+
+| Arquivo | Calcula | Regras |
+| --- | --- | --- |
+| `model/Modelos.kt` | Ciclo, Entrada, ContaFixa, MetaReserva e Gasto | — |
+| `calculadora/Ciclos.kt` | Ciclo de cada data e mudança do dia do pagamento | RN01, RN02 |
+| `calculadora/Orcamento.kt` | Contas ativas, reserva, disponível, quanto falta para as metas e reserva invadida | RN03 a RN09, RN13 |
+| `calculadora/LimiteSemanal.kt` | Limite da semana, automático e manual, e o aviso de ritmo | RN10 a RN13 |
+| `usecase/Validacoes.kt` | Bloqueio de gasto por data e valor; valor positivo em qualquer cadastro | RN14, RN15 |
+
 ## Versões principais
 
 | Item | Versão |
@@ -56,8 +69,14 @@ seguindo o tema claro ou escuro do aparelho, sem erros.
 
 ## Testes
 
-Ainda não há testes do domínio: eles começam na Etapa 2, um para cada RN e CA do briefing.
-Por enquanto, o GitHub Actions só confirma que o projeto monta sem erro.
+- **Domínio:** 74 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
+  RN de RN01 a RN15 tem teste com o código no nome, e os critérios CA01 a CA07, CA09, CA10 e
+  CA13 a CA16 estão em `CriteriosDeAceiteTest.kt`, com o cenário base do briefing
+  (`CenarioBase.kt`) e os valores exatos em centavos.
+- **No aparelho:** 1 teste instrumentado (`BackupTest`, RN16). Ele roda no emulador, com
+  `./gradlew connectedDebugAndroidTest`, e não roda no GitHub Actions, porque precisa de um aparelho.
+- **Ainda sem teste, como previsto:** CA08 e CA11 (Etapa 6, alertas e fechamento de ciclo) e CA12
+  (Etapa 5, telas).
 
 ## Pendências e observações
 
@@ -75,11 +94,20 @@ Por enquanto, o GitHub Actions só confirma que o projeto monta sem erro.
   limite manual (RN12) também passou a ser proporcional nas semanas partidas do começo e do fim
   do ciclo (novo CA16: R$ 500,00 viram R$ 285,71 de 01 a 04/10). A P11 (onde
   ficam as interfaces dos repositórios) fica a critério do desenvolvedor na Etapa 3.
+- Decisões do dono no começo da Etapa 2, registradas no briefing: mudar o dia do pagamento para o
+  próprio dia de hoje fecha o ciclo ontem e abre um novo hoje (RN01); a duração de uma conta fixa
+  conta os ciclos pelo mês em que começam (RN03); uma conta encerrada no meio do ciclo ainda é
+  descontada nele e sai a partir do seguinte (RN04).
+- A RN05 está testada só na parte de cálculo: editar o valor de uma conta muda o ciclo atual e os
+  futuros. A parte "nunca muda ciclos já fechados" depende do retrato do ciclo (CicloFechado), que
+  é criado na Etapa 6 e testado pelo CA11.
+- Atalho do Ponytail registrado no código: os modelos do domínio só têm os campos usados nos
+  cálculos. Os demais campos do modelo de dados (id, descrição, categoria, nome da meta, dia de
+  vencimento) entram na Etapa 3.
 - O GitHub avisou que o runner `ubuntu-latest` passa para o Ubuntu 26 a partir de 19/10/2026.
   Não exige ação agora: vale conferir se os testes continuam passando depois dessa data.
 
 ## Próximo passo
 
-Etapa 2: primeiro, um commit de limpeza com os itens B do QA. Depois, criar no `:domain` as
-classes que calculam ciclo, contas ativas, reserva, disponível e limite semanal (RN01 a RN15),
-com testes unitários para cada regra e para os critérios de aceite (CA) que dependem só de cálculo.
+Revisão do QA da Etapa 2 e aprovação do dono. Depois, a Etapa 3 (Persistência): tabelas do Room,
+DAOs, repositórios e DataStore, com testes de DAO e de repositório.

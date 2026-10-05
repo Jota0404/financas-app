@@ -52,7 +52,7 @@ financas-app/
 │   │   ├── model/             modelos do domínio (Entrada, ContaFixa, Gasto...)
 │   │   ├── usecase/           casos de uso (ações do app)
 │   │   └── calculadora/       cálculos de ciclo, reserva, disponível e limite semanal
-│   └── src/test/kotlin/...    testes unitários das regras (mesma estrutura do main)
+│   └── src/test/kotlin/...    testes das regras (RN) e dos critérios de aceite (CA)
 ├── CLAUDE.md                  regras de trabalho para o assistente de desenvolvimento
 └── README.md
 ```
