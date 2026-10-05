@@ -1,6 +1,6 @@
 # Briefing — App de Finanças Pessoais (Android)
 
-Versão de 04/10/2026
+Versão de 05/10/2026
 
 ## Visão geral
 
@@ -57,7 +57,7 @@ O MVP entrega o ciclo completo: cadastrar, calcular o disponível e alertar. Tud
 
 **Fora do MVP (versões futuras)**
 
-- Login, nuvem e sincronização entre aparelhos.
+- Login, nuvem própria do app e sincronização entre aparelhos. O backup do próprio Android (RN16) não conta como nuvem do app e é permitido.
 - Integração com bancos (Open Finance) ou leitura de SMS/notificação bancária.
 - Gráficos avançados e relatórios exportados.
 - Cartão de crédito com fatura e fechamento (entra como gasto comum no MVP).
@@ -104,6 +104,10 @@ Todos os termos são do ciclo atual, em centavos.
 - **RN14** — Gasto com data retroativa é permitido dentro do ciclo atual e recalcula tudo. Data em ciclo fechado ou futura é bloqueada.
 - **RN15** — Valor zero ou negativo é bloqueado em qualquer cadastro.
 
+**Backup**
+
+- **RN16** — Os dados do app (banco Room e DataStore) entram no backup automático do Android e são restaurados ao reinstalar o app ou trocar de celular. O backup não é obrigatório: quem liga ou desliga é o usuário, na opção de backup do Google nas configurações do celular. O app funciona igual nos dois casos.
+
 **Alertas**
 
 | Código | Quando dispara | Frequência máxima |
@@ -143,16 +147,24 @@ Telas (Compose) -> ViewModels -> Domínio (casos de uso + calculadoras, RN01-RN1
 WorkManager -> Domínio (calcula) ; WorkManager -> Notificações (A1-A5)
 ```
 
-Cada seta só aponta para baixo: tela nunca acessa banco direto, e o domínio não conhece nada do Android. O WorkManager usa o mesmo domínio que as telas, então o alerta e a tela inicial nunca mostram números diferentes.
+Cada seta só aponta para baixo: tela nunca acessa banco direto, e o domínio não conhece nada do Android.
+
+O domínio fica num módulo Gradle separado, **`:domain`**, em Kotlin puro (JVM, sem plugin Android). O módulo `:app` depende do `:domain`, nunca o contrário. Como o `:domain` não enxerga as bibliotecas do Android, o próprio compilador recusa um `import android.*` ali. O WorkManager usa o mesmo domínio que as telas, então o alerta e a tela inicial nunca mostram números diferentes.
 
 ```text
-app/src/main/java/.../financas/
+app/src/main/java/.../financas/       módulo :app (Android)
 ├── ui/          telas e ViewModels, uma pasta por funcionalidade
-├── domain/      modelos, casos de uso e calculadoras (sem import android.*)
 ├── data/        entidades Room, DAOs, DataStore e repositórios
 ├── worker/      agendamento e disparo dos alertas
 └── di/          módulos do Hilt
+
+domain/src/main/kotlin/.../financas/domain/   módulo :domain (Kotlin puro)
+├── model/       modelos do domínio
+├── usecase/     casos de uso
+└── calculadora/ cálculos de ciclo, reserva, disponível e limite semanal
 ```
+
+Os testes do domínio ficam em `domain/src/test/kotlin/.../financas/domain/`.
 
 ## Telas e fluxos
 
@@ -173,7 +185,7 @@ As telas 4, 5 e 6 ficam dentro da aba Cadastros. Toda tela de lista tem estado v
 
 Sete etapas, e cada uma termina numa entrega ao QA. A regra de ouro: **os cálculos são construídos e testados antes de qualquer tela**, porque um bug no cálculo contamina tudo o que vem depois.
 
-1. **Setup** — projeto Android com Compose, Hilt e estrutura de pastas da arquitetura; repositório no GitHub com README inicial.
+1. **Setup** — projeto Android com Compose, Hilt e estrutura de pastas da arquitetura; repositório no GitHub com README inicial; módulo :domain separado; testes rodando no GitHub Actions a cada push.
    - Entrega ao QA: projeto compila e abre uma tela vazia.
 2. **Domínio (só Kotlin puro)** — classes que calculam ciclo, contas ativas, reserva, disponível e limite semanal (RN01 a RN15), sem banco e sem tela.
    - Entrega ao QA: testes unitários passando para cada RN, incluindo os casos de borda.
