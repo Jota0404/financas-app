@@ -2,8 +2,8 @@
 
 Atualizado em 05/10/2026.
 
-**Etapa atual:** 2 de 7 (Domínio) concluída e entregue ao QA. Aguarda a revisão do QA e a aprovação
-do dono antes da Etapa 3.
+**Etapa atual:** 2 de 7 (Domínio) revisada pelo QA (aprovada com ressalvas), com as correções
+feitas. Aguarda a aprovação do dono para começar a Etapa 3.
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -12,7 +12,7 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | Etapa | Situação |
 | --- | --- |
 | 1. Setup | ✅ Concluída e aprovada em 05/10/2026 |
-| 2. Domínio (só Kotlin puro, RN01 a RN15) | 🔍 Concluída em 05/10/2026, aguardando QA e aprovação |
+| 2. Domínio (só Kotlin puro, RN01 a RN15) | 🔍 Concluída e revisada pelo QA em 05/10/2026, aguardando aprovação |
 | 3. Persistência (Room, DAOs, DataStore) | ⏳ Não iniciada |
 | 4. Cadastros | ⏳ Não iniciada |
 | 5. Gastos e Início | ⏳ Não iniciada |
@@ -69,7 +69,7 @@ Os cálculos do app, no módulo `:domain`, sem banco e sem tela (ainda não apar
 
 ## Testes
 
-- **Domínio:** 74 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
+- **Domínio:** 77 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
   RN de RN01 a RN15 tem teste com o código no nome, e os critérios CA01 a CA07, CA09, CA10 e
   CA13 a CA16 estão em `CriteriosDeAceiteTest.kt`, com o cenário base do briefing
   (`CenarioBase.kt`) e os valores exatos em centavos.
@@ -104,10 +104,19 @@ Os cálculos do app, no módulo `:domain`, sem banco e sem tela (ainda não apar
 - Atalho do Ponytail registrado no código: os modelos do domínio só têm os campos usados nos
   cálculos. Os demais campos do modelo de dados (id, descrição, categoria, nome da meta, dia de
   vencimento) entram na Etapa 3.
+- Revisão do QA da Etapa 2 ([`qa/2026-10-05-etapa-2.md`](qa/2026-10-05-etapa-2.md)): aprovada com
+  ressalvas, sem itens Críticos ou Altos. Corrigidos M1 (mudança do dia do pagamento no primeiro
+  dia do ciclo agora diz qual ciclo fecha), M2 e M3 (conforme as decisões P12 e P13) e B3. O B1
+  (bloquear ou só avisar ao salvar meta, no domínio) fica para a Etapa 4.
+- Decisões do dono sobre P12 a P16, registradas no briefing: reserva invadida só por gasto (RN09);
+  salário recorrente a partir do primeiro pagamento; `inicioCicloAtual` e `fimCicloAtual` nas
+  configurações depois de uma mudança do dia do pagamento (o dono escolheu guardar também o fim,
+  porque só o início não identifica o ciclo); limitação aceita da mudança que pula um mês (RN03);
+  o que "fixo" quer dizer no limite semanal (RN11).
 - O GitHub avisou que o runner `ubuntu-latest` passa para o Ubuntu 26 a partir de 19/10/2026.
   Não exige ação agora: vale conferir se os testes continuam passando depois dessa data.
 
 ## Próximo passo
 
-Revisão do QA da Etapa 2 e aprovação do dono. Depois, a Etapa 3 (Persistência): tabelas do Room,
+Aprovação do dono. Depois, a Etapa 3 (Persistência): tabelas do Room,
 DAOs, repositórios e DataStore, com testes de DAO e de repositório.
