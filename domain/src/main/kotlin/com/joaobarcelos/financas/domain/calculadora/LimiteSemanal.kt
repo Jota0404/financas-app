@@ -26,8 +26,8 @@ fun Orcamento.limiteSemanal(ciclo: Ciclo, data: LocalDate, limiteManual: Long? =
     require(data in ciclo) { "$data fora do ciclo $ciclo" }
     val segunda = data.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val domingo = segunda.plusDays(6)
-    val inicio = if (segunda < ciclo.inicio) ciclo.inicio else segunda
-    val fim = if (domingo > ciclo.fim) ciclo.fim else domingo
+    val inicio = maxOf(segunda, ciclo.inicio)
+    val fim = minOf(domingo, ciclo.fim)
     val dias = ChronoUnit.DAYS.between(inicio, fim) + 1
     val diasRestantes = ChronoUnit.DAYS.between(inicio, ciclo.fim) + 1
 
