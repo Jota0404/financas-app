@@ -1,6 +1,6 @@
 # CLAUDE.md — Regras do projeto
 
-App de Finanças Pessoais para Android (Kotlin + Jetpack Compose).
+Fôlego, app de finanças pessoais para Android (Kotlin + Jetpack Compose).
 Pacote base: `com.joaobarcelos.financas`.
 
 ## Comunicação

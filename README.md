@@ -1,6 +1,6 @@
-# App de Finanças Pessoais
+# Fôlego
 
-App Android offline que responde, toda semana: quanto posso gastar sem comprometer as contas fixas e a reserva?
+App de finanças pessoais para Android, offline, que responde toda semana: quanto posso gastar sem comprometer as contas fixas e a reserva?
 
 Repositório: https://github.com/Jota0404/financas-app
 

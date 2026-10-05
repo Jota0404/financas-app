@@ -59,8 +59,8 @@ Por enquanto, o GitHub Actions só confirma que o projeto monta sem erro.
 
 - Revisão completa do QA ([`qa/2026-10-05-etapa-1.md`](qa/2026-10-05-etapa-1.md)): Etapa 1
   aprovada com ressalvas, sem itens Críticos ou Altos. M1 e M2 já resolvidos (Git configurado e
-  agente de QA com acesso às skills). B1, B2 e B4 a B8 ficam para o começo da Etapa 2; B3, para a
-  Etapa 7. O nome do app foi confirmado como "Finanças".
+  agente de QA com acesso às skills). B4 resolvido: o app passou a se chamar **Fôlego**.
+  B1, B2 e B5 a B8 ficam para o começo da Etapa 2; B3, para a Etapa 7.
 - Mudança no briefing nesta etapa: criada a **RN16** (backup do Android permitido, não conta como
   nuvem do app), e o domínio passou a ser o módulo `:domain`.
 - Decisões do dono sobre as propostas do QA (P1 a P10), registradas no briefing: a RN08 soma todas

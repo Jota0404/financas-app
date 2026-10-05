@@ -1,10 +1,10 @@
-# Briefing — App de Finanças Pessoais (Android)
+# Briefing — Fôlego, app de finanças pessoais (Android)
 
 Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) e sobre o limite manual em semana partida (RN12).
 
 ## Visão geral
 
-O app responde uma pergunta, toda semana: **quanto posso gastar sem comprometer as contas fixas e a reserva?** É um controle financeiro pessoal para Android, offline, que registra entradas, contas fixas com duração, gastos do dia a dia e metas de reserva, e avisa quando o limite se aproxima.
+O app se chama **Fôlego**: o fôlego que sobra até o próximo pagamento. Ele responde uma pergunta, toda semana: **quanto posso gastar sem comprometer as contas fixas e a reserva?** É um controle financeiro pessoal para Android, offline, que registra entradas, contas fixas com duração, gastos do dia a dia e metas de reserva, e avisa quando o limite se aproxima.
 
 - **Usuário:** uso pessoal (um único usuário). O MVP é estruturado para poder virar produto depois, sem retrabalho na base.
 - **Objetivo paralelo:** servir de peça de portfólio, então stack, arquitetura e testes seguem o padrão que o mercado cobra.
