@@ -26,7 +26,8 @@ Pacote base: `com.joaobarcelos.financas`.
 
 - **Dinheiro sempre em centavos, tipo `Long`.** Nunca `Double` ou `Float`.
 - Percentuais em pontos-base (`Int`, 1000 = 10%), conforme o briefing.
-- `domain/` é **Kotlin puro**: nenhum `import android.*` (nem bibliotecas Android).
+- Todo o domínio fica no módulo **`:domain`**, que **não pode depender do Android**
+  (nenhum `import android.*`, nenhuma biblioteca Android, nenhuma dependência de `:app`).
 - Respeitar a direção das camadas: ui → domain → data. Tela nunca acessa banco direto.
 
 ## Testes
@@ -35,4 +36,4 @@ Pacote base: `com.joaobarcelos.financas`.
   **teste unitário**, com o código no nome do teste.
   Exemplo: `` `RN13 divisao em centavos arredonda para baixo`() ``,
   `` `CA06 limite de 1000 reais em 3 semanas e 333,33`() ``.
-- Testes do domínio ficam em `app/src/test/java/com/joaobarcelos/financas/domain/`.
+- Testes do domínio ficam em `domain/src/test/kotlin/com/joaobarcelos/financas/domain/`.
