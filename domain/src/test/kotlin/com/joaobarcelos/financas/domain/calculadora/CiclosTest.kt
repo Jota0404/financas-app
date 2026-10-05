@@ -2,6 +2,8 @@ package com.joaobarcelos.financas.domain.calculadora
 
 import com.joaobarcelos.financas.domain.data
 import com.joaobarcelos.financas.domain.model.Ciclo
+import com.joaobarcelos.financas.domain.model.Configuracoes
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
@@ -93,6 +95,46 @@ class CiclosTest {
         assertThrows(IllegalArgumentException::class.java) {
             mudarDiaPagamento(outubro, 15, hoje = data(1, 11))
         }
+    }
+
+    @Test
+    fun `RN01 sem mudanca o ciclo atual sai do dia do pagamento`() {
+        assertNull(Configuracoes().cicloIrregular)
+        assertEquals(outubro, Configuracoes().cicloAtual(data(20, 10)))
+    }
+
+    @Test
+    fun `RN01 depois de mudar o dia em 20-10 o ciclo atual vai ate 14-11`() {
+        // P14: só o início (01/10) não diria se o ciclo termina em 14/10 ou em 14/11
+        val config = Configuracoes(diaPagamento = 1).comDiaPagamento(15, hoje = data(20, 10))
+        assertEquals(Ciclo(data(1, 10), data(14, 11)), config.cicloIrregular)
+        assertEquals(Ciclo(data(1, 10), data(14, 11)), config.cicloAtual(data(25, 10)))
+        assertEquals(Ciclo(data(15, 11), data(14, 12)), config.cicloAtual(data(15, 11)))
+    }
+
+    @Test
+    fun `RN01 depois de mudar o dia em 10-10 o ciclo atual vai ate 14-10`() {
+        val config = Configuracoes(diaPagamento = 1).comDiaPagamento(15, hoje = data(10, 10))
+        assertEquals(Ciclo(data(1, 10), data(14, 10)), config.cicloAtual(data(14, 10)))
+        assertEquals(Ciclo(data(15, 10), data(14, 11)), config.cicloAtual(data(15, 10)))
+    }
+
+    @Test
+    fun `RN01 mudar para o dia de hoje nao guarda ciclo irregular`() {
+        val config = Configuracoes(diaPagamento = 1).comDiaPagamento(15, hoje = data(15, 10))
+        assertNull(config.cicloIrregular)
+        assertEquals(15, config.diaPagamento)
+        assertEquals(Ciclo(data(15, 10), data(14, 11)), config.cicloAtual(data(15, 10)))
+    }
+
+    @Test
+    fun `RN01 segunda mudanca dentro do ciclo irregular mantem o inicio`() {
+        // 1 -> 15 em 20/10 (ciclo 01/10-14/11) e depois 15 -> 5 em 25/10: o ciclo vai até 04/11
+        val config = Configuracoes(diaPagamento = 1)
+            .comDiaPagamento(15, hoje = data(20, 10))
+            .comDiaPagamento(5, hoje = data(25, 10))
+        assertEquals(Ciclo(data(1, 10), data(4, 11)), config.cicloAtual(data(25, 10)))
+        assertEquals(Ciclo(data(5, 11), data(4, 12)), config.cicloAtual(data(5, 11)))
     }
 
     @Test

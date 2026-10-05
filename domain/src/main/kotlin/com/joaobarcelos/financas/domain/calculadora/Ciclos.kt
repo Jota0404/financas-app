@@ -1,6 +1,7 @@
 package com.joaobarcelos.financas.domain.calculadora
 
 import com.joaobarcelos.financas.domain.model.Ciclo
+import com.joaobarcelos.financas.domain.model.Configuracoes
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -36,4 +37,18 @@ fun mudarDiaPagamento(atual: Ciclo, novoDia: Int, hoje: LocalDate): MudancaDiaPa
         atual.inicio == hoje -> MudancaDiaPagamento(novo, fechado = null)
         else -> MudancaDiaPagamento(novo, fechado = Ciclo(atual.inicio, hoje.minusDays(1)))
     }
+}
+
+/** Ciclo que contém [hoje]: o irregular guardado depois de uma mudança do dia (P14) ou o normal. */
+fun Configuracoes.cicloAtual(hoje: LocalDate): Ciclo =
+    cicloIrregular?.takeIf { hoje in it } ?: cicloDe(hoje, diaPagamento)
+
+/**
+ * RN01 e P14: configurações depois de mudar o dia do pagamento para [novoDia] em [hoje]. O ciclo atual
+ * fica guardado enquanto for diferente do normal do novo dia. O ciclo que fecha, se houver, vem de
+ * [mudarDiaPagamento].
+ */
+fun Configuracoes.comDiaPagamento(novoDia: Int, hoje: LocalDate): Configuracoes {
+    val atual = mudarDiaPagamento(cicloAtual(hoje), novoDia, hoje).atual
+    return copy(diaPagamento = novoDia, cicloIrregular = atual.takeIf { it != cicloDe(hoje, novoDia) })
 }
