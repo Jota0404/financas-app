@@ -1,6 +1,6 @@
 # Briefing — App de Finanças Pessoais (Android)
 
-Versão de 05/10/2026
+Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10).
 
 ## Visão geral
 
@@ -76,7 +76,7 @@ Todos os termos são do ciclo atual, em centavos.
 
 **Ciclo**
 
-- **RN01** — O ciclo começa no **dia do pagamento**, configurável (padrão: dia 1), e termina na véspera do próximo.
+- **RN01** — O ciclo começa no **dia do pagamento**, configurável (padrão: dia 1), e termina na véspera do próximo. Se o dia do pagamento mudar, o ciclo atual termina na véspera da próxima ocorrência do novo dia depois de hoje (ex.: mudar de 1 para 15 em 10/10 faz o ciclo atual terminar em 14/10).
 - **RN02** — Se o dia configurado não existe no mês (ex.: 31 em abril), o ciclo começa no último dia daquele mês.
 
 **Contas fixas**
@@ -89,19 +89,19 @@ Todos os termos são do ciclo atual, em centavos.
 
 - **RN06** — Cada meta de reserva tem nome, tipo (valor fixo em R$ ou percentual das entradas do ciclo) e valor. Pode haver mais de uma (ex.: "Reserva de segurança" e "Investimento").
 - **RN07** — A reserva é descontada **antes** dos gastos variáveis e não aparece como disponível em nenhuma tela.
-- **RN08** — Ao salvar uma meta, se Entradas − Contas fixas < Reserva, o app bloqueia o salvamento e mostra quanto falta para a meta ser viável.
-- **RN09** — Um gasto que deixa o disponível negativo é registrado mesmo assim (o dinheiro já saiu), mas o ciclo fica marcado como **reserva invadida**, com o valor invadido, e dispara o alerta A4.
+- **RN08** — Ao salvar uma meta, se Entradas − Contas fixas < soma de todas as metas ativas (incluindo a que está sendo salva), o app bloqueia o salvamento e mostra quanto falta para a meta ser viável. Ao salvar uma conta fixa ou uma entrada que deixe as metas maiores que Entradas − Contas fixas, o app salva, mas avisa quanto falta.
+- **RN09** — Um gasto que deixa o disponível negativo é registrado mesmo assim (o dinheiro já saiu), mas o ciclo fica marcado como **reserva invadida**, com o valor invadido (quanto o disponível ficou negativo, mesmo que passe do total da reserva), e dispara o alerta A4.
 
 **Limite semanal**
 
 - **RN10** — A semana vai de segunda a domingo.
-- **RN11** — Limite automático = disponível no início da semana ÷ semanas restantes no ciclo (contando a atual, arredondando para cima). O valor é calculado na segunda às 00:00 e fica fixo até domingo.
+- **RN11** — Limite automático da semana = disponível no momento do cálculo × dias da semana dentro do ciclo ÷ dias que faltam no ciclo, contando o dia do cálculo. A multiplicação vem antes da divisão, e a divisão arredonda para baixo (RN13). O cálculo acontece na segunda às 00:00, ou no primeiro dia do ciclo quando ele começa no meio da semana, e o valor fica fixo até o fim da semana ou do ciclo, o que vier antes. Se o disponível for zero ou negativo, o limite é R$ 0,00. Exemplo: ciclo de 01 a 31/10/2026 com R$ 1.500,00 disponíveis; de quinta 01/10 a domingo 04/10, o limite é R$ 1.500,00 × 4 ÷ 31 = R$ 193,54.
 - **RN12** — O usuário pode definir um limite manual. Se ele for maior que o automático, o app avisa que o ritmo não fecha o ciclo, mas aceita.
-- **RN13** — Divisões em centavos sempre arredondam **para baixo**, a favor da segurança.
+- **RN13** — Divisões em centavos sempre arredondam **para baixo**, a favor da segurança. Exceção: o valor de uma meta em percentual arredonda **para cima**, para nunca reservar menos do que o percentual.
 
 **Gastos**
 
-- **RN14** — Gasto com data retroativa é permitido dentro do ciclo atual e recalcula tudo. Data em ciclo fechado ou futura é bloqueada.
+- **RN14** — Gasto com data retroativa é permitido dentro do ciclo atual e recalcula tudo, inclusive o limite da semana atual quando a data é de uma semana anterior. Data em ciclo fechado ou futura é bloqueada.
 - **RN15** — Valor zero ou negativo é bloqueado em qualquer cadastro.
 
 **Backup**
@@ -118,7 +118,7 @@ Todos os termos são do ciclo atual, em centavos.
 | A4 | Reserva invadida (RN09) | 1 por gasto que invade |
 | A5 | Resumo do ciclo no dia do pagamento: quanto sobrou e se a reserva foi cumprida | 1 por ciclo |
 
-Os percentuais de A2 e A3 são configuráveis. O mesmo alerta nunca dispara duas vezes no mesmo período.
+Os percentuais de A2 e A3 são configuráveis. O mesmo alerta nunca dispara duas vezes no mesmo período. Na semana que cruza a virada do ciclo, cada parte tem seu próprio limite (RN11) e conta como um período separado para A2 e A3.
 
 ## Modelo de dados
 
@@ -200,7 +200,7 @@ Não avance de etapa com bug crítico aberto pelo QA na etapa anterior.
 
 ## Critérios de aceite
 
-Todos os casos usam o mesmo cenário base, e cada um vira um teste automatizado na etapa 2 ou 6.
+Os casos usam o mesmo cenário base, salvo quando a situação diz outra coisa. Os CA de cálculo viram testes unitários na etapa 2 ou 6; o CA12 vira teste de interface na etapa 5. A RN16 é coberta por um teste instrumentado (backup ligado) e por uma checagem manual de backup e restauração na etapa 3.
 
 **Cenário base:** salário recorrente de R$ 3.000,00; dia do pagamento 1; aluguel R$ 1.000,00 sem fim; celular R$ 200,00 por 3 meses a partir do ciclo de outubro/2026; reserva de 10% das entradas.
 
@@ -209,15 +209,18 @@ Todos os casos usam o mesmo cenário base, e cada um vira um teste automatizado 
 | CA01 | RN03, RN07 | Ciclo de outubro, sem gastos | Disponível = R$ 1.500,00 |
 | CA02 | RN03 | Ciclo de janeiro/2027, sem gastos | Celular encerrado; disponível = R$ 1.700,00 |
 | CA03 | RN09 | Gasto de R$ 1.600,00 em outubro | Gasto salvo; disponível = −R$ 100,00; reserva invadida em R$ 100,00; alerta A4 |
-| CA04 | RN08 | Criar meta de R$ 2.000,00 (valor fixo) em outubro | Salvamento bloqueado; mensagem informa que faltam R$ 200,00 |
-| CA05 | RN11 | Início de outubro, 4 semanas restantes, sem gastos | Limite semanal = R$ 375,00 |
-| CA06 | RN13 | Disponível de R$ 1.000,00 com 3 semanas restantes | Limite = R$ 333,33 (nunca 333,34) |
+| CA04 | RN08 | Criar meta de R$ 2.000,00 (valor fixo) em outubro | Salvamento bloqueado; mensagem informa que faltam R$ 500,00 |
+| CA05 | RN11 | Segunda, 05/10/2026, sem gastos (27 dias restantes no ciclo) | Limite semanal = R$ 388,88 (R$ 1.500,00 × 7 ÷ 27) |
+| CA06 | RN13 | Disponível de R$ 1.000,00 numa segunda com 21 dias restantes no ciclo | Limite = R$ 333,33 (nunca 333,34) |
 | CA07 | RN02 | Dia do pagamento 31, ciclo de abril | Ciclo começa em 30/04 |
-| CA08 | A2 | Gastos da semana chegam a R$ 262,50 (70% de R$ 375,00) e depois a R$ 290,00 | A2 dispara uma única vez |
+| CA08 | A2 | Na semana do CA05, os gastos chegam a R$ 272,22 (primeiro valor que atinge 70% de R$ 388,88) e depois a R$ 300,00 | A2 dispara uma única vez |
 | CA09 | RN15 | Gasto de R$ 0,00 | Salvamento bloqueado |
 | CA10 | RN14 | Gasto com data em ciclo já fechado | Salvamento bloqueado |
 | CA11 | RN05 | Aluguel editado para R$ 1.100,00 em novembro | CicloFechado de outubro continua com R$ 1.000,00 de aluguel |
 | CA12 | Telas | Registrar gasto a partir do Início | No máximo 3 toques (categoria padrão: Outros) |
+| CA13 | RN11 | Quinta, 01/10/2026 (primeiro dia do ciclo), sem gastos | Limite de 01 a 04/10 = R$ 193,54 (R$ 1.500,00 × 4 ÷ 31) |
+| CA14 | RN11 | Segunda, 05/10/2026, com o gasto do CA03 feito entre 01 e 04/10 (disponível −R$ 100,00) | Limite semanal = R$ 0,00 |
+| CA15 | RN13 | Salário de R$ 3.000,05 com a meta de 10% | Reserva = R$ 300,01 (arredonda para cima) |
 
 Critérios gerais: o app não fecha sozinho em nenhum fluxo, funciona sem internet, e os dados sobrevivem a fechar o app e reiniciar o celular.
 
