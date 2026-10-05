@@ -2,7 +2,7 @@
 
 Atualizado em 05/10/2026.
 
-**Etapa atual:** 1 de 7 concluída e aprovada pelo dono. A próxima é a Etapa 2 (Domínio).
+**Etapa atual:** 2 de 7 (Domínio), em andamento. A limpeza pedida pelo QA na Etapa 1 já foi feita.
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -11,7 +11,7 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | Etapa | Situação |
 | --- | --- |
 | 1. Setup | ✅ Concluída e aprovada em 05/10/2026 |
-| 2. Domínio (só Kotlin puro, RN01 a RN15) | ⏭️ Próxima |
+| 2. Domínio (só Kotlin puro, RN01 a RN15) | 🔨 Em andamento |
 | 3. Persistência (Room, DAOs, DataStore) | ⏳ Não iniciada |
 | 4. Cadastros | ⏳ Não iniciada |
 | 5. Gastos e Início | ⏳ Não iniciada |
@@ -28,10 +28,13 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
     compilador recusa qualquer `import android.*` nele. O `:app` depende do `:domain`,
     nunca o contrário.
 - Estrutura de pastas da arquitetura criada, ainda vazia (ver README).
-- Backup automático do Android ligado (`allowBackup`), conforme a RN16.
-- GitHub Actions roda os testes unitários de todos os módulos a cada push na `main`.
-- Sobras do modelo do Android Studio removidas (primeira revisão do QA, itens 1 a 12). A revisão
-  completa achou mais algumas (B1 e B2), que serão limpas no começo da Etapa 2.
+- Backup automático do Android ligado (`allowBackup`), conforme a RN16, com um teste no aparelho
+  (`BackupTest`) que confere isso.
+- GitHub Actions roda, a cada push na `main`, os testes unitários de todos os módulos, gera o APK
+  de teste e roda o lint (`./gradlew test assembleDebug lintDebug`).
+- Sobras do modelo do Android Studio removidas: itens 1 a 12 da primeira revisão do QA e, no
+  começo da Etapa 2, o teste de exemplo, as cores roxas e as bibliotecas de pré-visualização
+  (B1, B2 e itens 2, 4 e 5 do Ponytail). O tema usa as cores padrão do Material 3 até a Etapa 7.
 - Agentes `qa` e `coder` em `.claude/agents/`, e skills `/verificar`, `/testar-emulador` e
   `/cobertura-rn-ca` em `.claude/skills/`, usadas pelos dois.
 
@@ -43,8 +46,9 @@ seguindo o tema claro ou escuro do aparelho, sem erros.
 | Item | Versão |
 | --- | --- |
 | Android Gradle Plugin | 9.4.1 |
-| Kotlin | 2.2.10 |
-| Compose BOM | 2026.02.01 |
+| Gradle | 9.8.0 |
+| Kotlin | 2.4.20 |
+| Compose BOM | 2026.09.00 |
 | Hilt | 2.60.1 |
 | core-ktx | 1.19.1 |
 | activity-compose | 1.13.0 |
@@ -60,7 +64,9 @@ Por enquanto, o GitHub Actions só confirma que o projeto monta sem erro.
 - Revisão completa do QA ([`qa/2026-10-05-etapa-1.md`](qa/2026-10-05-etapa-1.md)): Etapa 1
   aprovada com ressalvas, sem itens Críticos ou Altos. M1 e M2 já resolvidos (Git configurado e
   agente de QA com acesso às skills). B4 resolvido: o app passou a se chamar **Fôlego**.
-  B1, B2 e B5 a B8 ficam para o começo da Etapa 2; B3, para a Etapa 7.
+  B1, B2, B5 a B8 e os itens 2, 4 e 5 do Ponytail foram resolvidos no começo da Etapa 2.
+  B3 (clarão branco ao abrir no modo escuro) e o item 3 do Ponytail (ícones `.webp` sem uso)
+  ficam para a Etapa 7.
 - Mudança no briefing nesta etapa: criada a **RN16** (backup do Android permitido, não conta como
   nuvem do app), e o domínio passou a ser o módulo `:domain`.
 - Decisões do dono sobre as propostas do QA (P1 a P10), registradas no briefing: a RN08 soma todas

@@ -22,7 +22,11 @@ O andamento atual do projeto está em [`docs/andamento.md`](docs/andamento.md).
 financas-app/
 ├── docs/
 │   ├── briefing.md            especificação oficial do app (regras RN, critérios CA)
-│   └── andamento.md           em que etapa o projeto está e o que já foi feito
+│   ├── andamento.md           em que etapa o projeto está e o que já foi feito
+│   └── qa/                    relatórios de revisão do QA, um por entrega
+├── .claude/                   configuração do assistente de desenvolvimento (Claude Code)
+│   ├── agents/                agentes coder (desenvolvedor) e qa (revisor)
+│   └── skills/                /verificar, /testar-emulador e /cobertura-rn-ca
 ├── app/src/main/java/com/joaobarcelos/financas/   módulo :app (Android)
 │   ├── ui/                    telas e ViewModels, uma pasta por funcionalidade
 │   │   ├── inicio/            tela inicial (disponível da semana e do ciclo)
@@ -41,6 +45,8 @@ financas-app/
 │   └── di/                    módulos do Hilt
 ├── app/src/test/java/com/joaobarcelos/financas/
 │   └── data/                  testes de persistência (mesma estrutura do main)
+├── app/src/androidTest/java/com/joaobarcelos/financas/
+│   └── BackupTest.kt          teste no aparelho: backup automático ligado (RN16)
 ├── domain/                    módulo :domain, regras de negócio em Kotlin puro (sem Android)
 │   ├── src/main/kotlin/com/joaobarcelos/financas/domain/
 │   │   ├── model/             modelos do domínio (Entrada, ContaFixa, Gasto...)
