@@ -2,8 +2,8 @@
 
 Atualizado em 05/10/2026.
 
-**Etapa atual:** 2 de 7 (Domínio) revisada pelo QA (aprovada com ressalvas), com as correções
-feitas. Aguarda a aprovação do dono para começar a Etapa 3.
+**Etapa atual:** 3 de 7 (Persistência) concluída e entregue ao QA. Aguarda a revisão do QA e a
+aprovação do dono antes da Etapa 4.
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -12,8 +12,8 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | Etapa | Situação |
 | --- | --- |
 | 1. Setup | ✅ Concluída e aprovada em 05/10/2026 |
-| 2. Domínio (só Kotlin puro, RN01 a RN15) | 🔍 Concluída e revisada pelo QA em 05/10/2026, aguardando aprovação |
-| 3. Persistência (Room, DAOs, DataStore) | ⏳ Não iniciada |
+| 2. Domínio (só Kotlin puro, RN01 a RN15) | ✅ Concluída e aprovada em 05/10/2026 |
+| 3. Persistência (Room, DAOs, DataStore) | 🔍 Concluída em 05/10/2026, aguardando QA e aprovação |
 | 4. Cadastros | ⏳ Não iniciada |
 | 5. Gastos e Início | ⏳ Não iniciada |
 | 6. Alertas e fechamento de ciclo | ⏳ Não iniciada |
@@ -54,6 +54,27 @@ Os cálculos do app, no módulo `:domain`, sem banco e sem tela (ainda não apar
 | `calculadora/LimiteSemanal.kt` | Limite da semana, automático e manual, e o aviso de ritmo | RN10 a RN13 |
 | `usecase/Validacoes.kt` | Bloqueio de gasto por data e valor; valor positivo em qualquer cadastro | RN14, RN15 |
 
+## O que já existe (Etapa 3)
+
+Os dados do app passam a ser guardados no celular (ainda sem tela para cadastrar):
+
+| Onde | O que faz |
+| --- | --- |
+| `domain/.../repository/Repositorios.kt` | O que o domínio precisa dos dados: orçamento, histórico e configurações (P11) |
+| `data/local/` | Banco Room com as 7 tabelas do briefing; nasce com as 5 categorias padrão |
+| `data/repository/RoomRepositorios.kt` | Salva, exclui e avisa a tela a cada mudança (Flow) |
+| `data/datastore/` | Configurações: dia do pagamento, ciclo irregular (P14), limite manual, alertas |
+| `di/DadosModule.kt` | Hilt: liga as interfaces do domínio às implementações |
+| `app/schemas/1.json` | Esquema da versão 1 do banco, para as migrações futuras |
+
+Os modelos do domínio ganharam os campos que faltavam (id, descrição, nome, vencimento e categoria).
+A regra da P14 (qual é o ciclo atual depois de mudar o dia do pagamento) ficou no domínio.
+
+**Backup (RN16), checagem manual no emulador:** com arquivos de teste nas pastas do banco e das
+configurações, o backup do Android (`bmgr backupnow`) funcionou, e depois de desinstalar e
+reinstalar o app os dois arquivos voltaram com o conteúdo original. Observação: o Android só faz
+backup de um app que já foi aberto pelo menos uma vez depois de instalado.
+
 ## Versões principais
 
 | Item | Versão |
@@ -65,14 +86,19 @@ Os cálculos do app, no módulo `:domain`, sem banco e sem tela (ainda não apar
 | Hilt | 2.60.1 |
 | core-ktx | 1.19.1 |
 | activity-compose | 1.13.0 |
+| Room | 2.8.5 |
+| DataStore | 1.2.1 |
+| Robolectric (testes) | 4.17 |
 | compileSdk / targetSdk | 37 |
 
 ## Testes
 
-- **Domínio:** 77 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
+- **Domínio:** 82 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
   RN de RN01 a RN15 tem teste com o código no nome, e os critérios CA01 a CA07, CA09, CA10 e
   CA13 a CA16 estão em `CriteriosDeAceiteTest.kt`, com o cenário base do briefing
   (`CenarioBase.kt`) e os valores exatos em centavos.
+- **Persistência:** 17 testes em `app/src/test/.../data/` (banco, repositórios e DataStore). Rodam no
+  computador com Robolectric, sem aparelho, e por isso também no GitHub Actions.
 - **No aparelho:** 1 teste instrumentado (`BackupTest`, RN16). Ele roda no emulador, com
   `./gradlew connectedDebugAndroidTest`, e não roda no GitHub Actions, porque precisa de um aparelho.
 - **Ainda sem teste, como previsto:** CA08 e CA11 (Etapa 6, alertas e fechamento de ciclo) e CA12
@@ -101,9 +127,6 @@ Os cálculos do app, no módulo `:domain`, sem banco e sem tela (ainda não apar
 - A RN05 está testada só na parte de cálculo: editar o valor de uma conta muda o ciclo atual e os
   futuros. A parte "nunca muda ciclos já fechados" depende do retrato do ciclo (CicloFechado), que
   é criado na Etapa 6 e testado pelo CA11.
-- Atalho do Ponytail registrado no código: os modelos do domínio só têm os campos usados nos
-  cálculos. Os demais campos do modelo de dados (id, descrição, categoria, nome da meta, dia de
-  vencimento) entram na Etapa 3.
 - Revisão do QA da Etapa 2 ([`qa/2026-10-05-etapa-2.md`](qa/2026-10-05-etapa-2.md)): aprovada com
   ressalvas, sem itens Críticos ou Altos. Corrigidos M1 (mudança do dia do pagamento no primeiro
   dia do ciclo agora diz qual ciclo fecha), M2 e M3 (conforme as decisões P12 e P13) e B3. O B1
@@ -113,10 +136,13 @@ Os cálculos do app, no módulo `:domain`, sem banco e sem tela (ainda não apar
   configurações depois de uma mudança do dia do pagamento (o dono escolheu guardar também o fim,
   porque só o início não identifica o ciclo); limitação aceita da mudança que pula um mês (RN03);
   o que "fixo" quer dizer no limite semanal (RN11).
+- Atalho do Ponytail da Etapa 2 (campos dos modelos) resolvido nesta etapa. Novo atalho:
+  `FinancasDao.kt:30` carrega os gastos de todos os ciclos; filtrar por data se o histórico pesar.
 - O GitHub avisou que o runner `ubuntu-latest` passa para o Ubuntu 26 a partir de 19/10/2026.
   Não exige ação agora: vale conferir se os testes continuam passando depois dessa data.
 
 ## Próximo passo
 
-Aprovação do dono. Depois, a Etapa 3 (Persistência): tabelas do Room,
-DAOs, repositórios e DataStore, com testes de DAO e de repositório.
+Revisão do QA da Etapa 3 e aprovação do dono. Depois, a Etapa 4 (Cadastros): telas de contas
+fixas, entradas e metas de reserva, com seus ViewModels. Na Etapa 4 entra também o B1 do QA da
+Etapa 2 (o domínio decide se bloqueia ou só avisa ao salvar uma meta).

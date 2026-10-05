@@ -44,13 +44,15 @@ financas-app/
 │   ├── worker/                agendamento e disparo dos alertas (WorkManager)
 │   └── di/                    módulos do Hilt
 ├── app/src/test/java/com/joaobarcelos/financas/
-│   └── data/                  testes de persistência (mesma estrutura do main)
+│   └── data/                  testes do banco, dos repositórios e do DataStore (Robolectric, sem aparelho)
+├── app/schemas/               esquema do banco a cada versão, base para as migrações do Room
 ├── app/src/androidTest/java/com/joaobarcelos/financas/
 │   └── BackupTest.kt          teste no aparelho: backup automático ligado (RN16)
 ├── domain/                    módulo :domain, regras de negócio em Kotlin puro (sem Android)
 │   ├── src/main/kotlin/com/joaobarcelos/financas/domain/
 │   │   ├── model/             modelos do domínio (Entrada, ContaFixa, Gasto...)
 │   │   ├── usecase/           casos de uso (ações do app)
+│   │   ├── repository/        interfaces dos repositórios (implementadas no :app, em data/)
 │   │   └── calculadora/       cálculos de ciclo, reserva, disponível e limite semanal
 │   └── src/test/kotlin/...    testes das regras (RN) e dos critérios de aceite (CA)
 ├── CLAUDE.md                  regras de trabalho para o assistente de desenvolvimento
