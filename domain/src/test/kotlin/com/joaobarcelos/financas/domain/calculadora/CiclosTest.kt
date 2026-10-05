@@ -40,12 +40,12 @@ class CiclosTest {
 
     @Test
     fun `RN01 mudar o dia de 1 para 15 em 10-10 termina o ciclo em 14-10`() {
-        assertEquals(Ciclo(data(1, 10), data(14, 10)), mudarDiaPagamento(outubro, 15, hoje = data(10, 10)))
+        assertEquals(MudancaDiaPagamento(Ciclo(data(1, 10), data(14, 10)), fechado = null), mudarDiaPagamento(outubro, 15, hoje = data(10, 10)))
     }
 
     @Test
     fun `RN01 depois da mudanca os ciclos seguem o novo dia`() {
-        val curto = mudarDiaPagamento(outubro, 15, hoje = data(10, 10))
+        val curto = mudarDiaPagamento(outubro, 15, hoje = data(10, 10)).atual
         assertEquals(Ciclo(data(15, 10), data(14, 11)), cicloDe(curto.fim.plusDays(1), 15))
     }
 
@@ -53,26 +53,39 @@ class CiclosTest {
     fun `RN01 mudar para um dia que ja passou no mes estica o ciclo ate o mes seguinte`() {
         // dia 15 -> 5 em 20/10: a próxima ocorrência do dia 5 é 05/11
         val atual = Ciclo(data(15, 10), data(14, 11))
-        assertEquals(Ciclo(data(15, 10), data(4, 11)), mudarDiaPagamento(atual, 5, hoje = data(20, 10)))
+        assertEquals(Ciclo(data(15, 10), data(4, 11)), mudarDiaPagamento(atual, 5, hoje = data(20, 10)).atual)
     }
 
     @Test
     fun `RN01 mudar para o dia de hoje fecha o ciclo ontem e abre um novo hoje`() {
         // decisão do dono: 1 -> 15 em 15/10 fecha outubro em 14/10 e abre 15/10 a 14/11
-        assertEquals(Ciclo(data(15, 10), data(14, 11)), mudarDiaPagamento(outubro, 15, hoje = data(15, 10)))
+        val mudanca = mudarDiaPagamento(outubro, 15, hoje = data(15, 10))
+        assertEquals(Ciclo(data(15, 10), data(14, 11)), mudanca.atual)
+        assertEquals(Ciclo(data(1, 10), data(14, 10)), mudanca.fechado)
+    }
+
+    @Test
+    fun `RN01 mudar no primeiro dia do ciclo para o dia de hoje nao fecha ciclo nenhum`() {
+        // RN02: 31 -> 28 em 28/02/2027; o ciclo do dia 31 também começou em 28/02
+        val atual = cicloDe(data(28, 2, 2027), 31)
+        assertEquals(Ciclo(data(28, 2, 2027), data(30, 3, 2027)), atual)
+        assertEquals(
+            MudancaDiaPagamento(Ciclo(data(28, 2, 2027), data(27, 3, 2027)), fechado = null),
+            mudarDiaPagamento(atual, 28, hoje = data(28, 2, 2027)),
+        )
     }
 
     @Test
     fun `RN01 mudar no primeiro dia do ciclo para o mesmo dia nao muda nada`() {
-        assertEquals(outubro, mudarDiaPagamento(outubro, 1, hoje = data(1, 10)))
-        assertEquals(outubro, mudarDiaPagamento(outubro, 1, hoje = data(10, 10)))
+        assertEquals(MudancaDiaPagamento(outubro, fechado = null), mudarDiaPagamento(outubro, 1, hoje = data(1, 10)))
+        assertEquals(MudancaDiaPagamento(outubro, fechado = null), mudarDiaPagamento(outubro, 1, hoje = data(10, 10)))
     }
 
     @Test
     fun `RN01 mudar para 31 num mes de 30 dias usa o ultimo dia do mes`() {
         // 1 -> 31 em 10/11: novembro não tem dia 31, então a próxima ocorrência é 30/11 (RN02)
         val novembro = Ciclo(data(1, 11), data(30, 11))
-        assertEquals(Ciclo(data(1, 11), data(29, 11)), mudarDiaPagamento(novembro, 31, hoje = data(10, 11)))
+        assertEquals(Ciclo(data(1, 11), data(29, 11)), mudarDiaPagamento(novembro, 31, hoje = data(10, 11)).atual)
     }
 
     @Test

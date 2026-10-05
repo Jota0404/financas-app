@@ -20,13 +20,20 @@ fun cicloDe(data: LocalDate, diaPagamento: Int): Ciclo {
     )
 }
 
+/** Resultado de uma mudança do dia do pagamento: o ciclo que contém hoje e, se houver, o que fecha ontem. */
+data class MudancaDiaPagamento(val atual: Ciclo, val fechado: Ciclo?)
+
 /**
- * RN01: o dia do pagamento muda para [novoDia] em [hoje]. Devolve o ciclo que contém hoje:
- * - em geral, o [atual] passa a terminar na véspera da próxima ocorrência do novo dia;
- * - se o novo dia é hoje, o [atual] termina ontem, e o ciclo devolvido começa hoje.
+ * RN01: o dia do pagamento muda para [novoDia] em [hoje]. Em geral, o ciclo [atual] passa a terminar
+ * na véspera da próxima ocorrência do novo dia. Se o novo dia é hoje, o [atual] fecha ontem e um
+ * ciclo novo começa hoje; se o [atual] também começou hoje, não há o que fechar.
  */
-fun mudarDiaPagamento(atual: Ciclo, novoDia: Int, hoje: LocalDate): Ciclo {
+fun mudarDiaPagamento(atual: Ciclo, novoDia: Int, hoje: LocalDate): MudancaDiaPagamento {
     require(hoje in atual) { "$hoje fora do ciclo atual $atual" }
     val novo = cicloDe(hoje, novoDia)
-    return if (novo.inicio == hoje) novo else Ciclo(atual.inicio, novo.fim)
+    return when {
+        novo.inicio != hoje -> MudancaDiaPagamento(Ciclo(atual.inicio, novo.fim), fechado = null)
+        atual.inicio == hoje -> MudancaDiaPagamento(novo, fechado = null)
+        else -> MudancaDiaPagamento(novo, fechado = Ciclo(atual.inicio, hoje.minusDays(1)))
+    }
 }

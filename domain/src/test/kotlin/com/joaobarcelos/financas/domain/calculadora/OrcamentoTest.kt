@@ -52,7 +52,7 @@ class OrcamentoTest {
     @Test
     fun `RN03 mudanca do dia que cria dois ciclos no mes desconta a conta nos dois`() {
         // decisão do dono: 1 -> 15 em 10/10 cria 01-14/10 e 15/10-14/11, os dois "de outubro"
-        val curto = mudarDiaPagamento(outubro, 15, hoje = data(10, 10))
+        val curto = mudarDiaPagamento(outubro, 15, hoje = data(10, 10)).atual
         val ciclos = generateSequence(curto) { cicloDe(it.fim.plusDays(1), 15) }.take(5).toList()
         assertEquals(data(15, 1, 2027), ciclos.last().inicio)
         assertEquals(listOf(true, true, true, true, false), ciclos.map { celular.ativaEm(it) })
