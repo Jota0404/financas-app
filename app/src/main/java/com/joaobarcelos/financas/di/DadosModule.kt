@@ -2,7 +2,6 @@ package com.joaobarcelos.financas.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
@@ -44,7 +43,7 @@ abstract class DadosModule {
         @Provides
         @Singleton
         fun dataStore(@ApplicationContext context: Context): DataStore<Preferences> =
-            PreferenceDataStoreFactory.create { context.preferencesDataStoreFile("configuracoes") }
+            DataStoreConfiguracoesRepository.criarDataStore { context.preferencesDataStoreFile("configuracoes") }
 
         @Provides
         fun relogio(): Clock = Clock.systemDefaultZone()

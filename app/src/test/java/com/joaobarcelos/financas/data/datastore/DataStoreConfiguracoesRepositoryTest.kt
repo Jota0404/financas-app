@@ -1,6 +1,5 @@
 package com.joaobarcelos.financas.data.datastore
 
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.joaobarcelos.financas.domain.calculadora.cicloAtual
 import com.joaobarcelos.financas.domain.calculadora.comDiaPagamento
 import com.joaobarcelos.financas.domain.model.Ciclo
@@ -35,7 +34,7 @@ class DataStoreConfiguracoesRepositoryTest {
         // espera o anterior fechar de vez; só cancelar deixa o arquivo preso por um instante
         escopos.forEach { it.coroutineContext[Job]!!.cancelAndJoin() }
         val escopo = CoroutineScope(Dispatchers.IO + SupervisorJob()).also { escopos += it }
-        return DataStoreConfiguracoesRepository(PreferenceDataStoreFactory.create(scope = escopo) { arquivo })
+        return DataStoreConfiguracoesRepository(DataStoreConfiguracoesRepository.criarDataStore(escopo) { arquivo })
     }
 
     @After
@@ -83,8 +82,12 @@ class DataStoreConfiguracoesRepositoryTest {
     }
 
     @Test
-    fun `arquivo de configuracoes estragado usa os padroes em vez de fechar o app`() = runTest {
-        arquivo.writeText("isto não é um arquivo do DataStore")
-        assertEquals(Configuracoes(), abrir().configuracoes().first())
+    fun `arquivo de configuracoes estragado usa os padroes e salva sem fechar o app`() = runTest {
+        // bytes que o DataStore não consegue ler (CorruptionException sem a proteção)
+        arquivo.writeBytes(byteArrayOf(0x0A, 0x7F, 0x01))
+        val repositorio = abrir()
+        assertEquals(Configuracoes(), repositorio.configuracoes().first())
+        repositorio.atualizar { it.copy(diaPagamento = 15) }
+        assertEquals(15, abrir().configuracoes().first().diaPagamento)
     }
 }

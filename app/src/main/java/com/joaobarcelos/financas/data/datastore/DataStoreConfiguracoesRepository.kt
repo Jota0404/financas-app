@@ -1,7 +1,9 @@
 package com.joaobarcelos.financas.data.datastore
 
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
@@ -11,9 +13,13 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.joaobarcelos.financas.domain.model.Ciclo
 import com.joaobarcelos.financas.domain.model.Configuracoes
 import com.joaobarcelos.financas.domain.repository.ConfiguracoesRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import java.io.File
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalTime
@@ -30,6 +36,21 @@ class DataStoreConfiguracoesRepository @Inject constructor(
 
     override suspend fun atualizar(mudanca: (Configuracoes) -> Configuracoes) {
         dataStore.edit { it.gravar(mudanca(it.paraConfiguracoes())) }
+    }
+
+    companion object {
+        /**
+         * Cria o DataStore das configurações. Arquivo corrompido vira configurações padrão, em vez
+         * de fechar o app ao ler ou ao salvar.
+         */
+        fun criarDataStore(
+            escopo: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
+            arquivo: () -> File,
+        ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+            corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+            scope = escopo,
+            produceFile = arquivo,
+        )
     }
 
     private object Chaves {
