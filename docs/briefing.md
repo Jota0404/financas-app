@@ -1,6 +1,6 @@
 # Briefing — Fôlego, app de finanças pessoais (Android)
 
-Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17).
+Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17) e sobre as dúvidas de tela do início da Etapa 4 (cadastro de parcelas, data das entradas e quando excluir uma conta fixa).
 
 ## Visão geral
 
@@ -82,7 +82,7 @@ Todos os termos são do ciclo atual, em centavos.
 **Contas fixas**
 
 - **RN03** — Uma conta fixa com duração de N meses está ativa nos N ciclos a partir do ciclo de início, inclusive. Depois disso, é encerrada automaticamente e para de ser descontada. Os ciclos são contados pelo mês em que começam: com 3 meses a partir de outubro, a conta vale em todo ciclo que começa em outubro, novembro ou dezembro. Se uma mudança do dia do pagamento (RN01) criar dois ciclos no mesmo mês, a conta é descontada nos dois, assim como o salário entra nos dois. Limitação conhecida e aceita: uma mudança do fim para o começo do mês pode pular um mês (ex.: de 31 para 1 em 05/02/2027 gera os ciclos 31/01–28/02 e 01/03–31/03, e nenhum começa em fevereiro), e aí a conta é descontada uma vez a menos.
-- **RN04** — Conta com duração "sem fim" fica ativa até o usuário encerrá-la manualmente. Uma conta encerrada no meio de um ciclo ainda é descontada nele e sai a partir do ciclo seguinte, a favor da segurança, porque a conta daquele ciclo pode já ter sido paga. Na tela, uma conta fixa que já foi descontada em algum ciclo é **encerrada**, não excluída; excluir só serve para conta cadastrada por engano, ainda sem nenhum ciclo descontado.
+- **RN04** — Conta com duração "sem fim" fica ativa até o usuário encerrá-la manualmente. Uma conta encerrada no meio de um ciclo ainda é descontada nele e sai a partir do ciclo seguinte, a favor da segurança, porque a conta daquele ciclo pode já ter sido paga. Na tela, uma conta fixa que já foi descontada em algum ciclo é **encerrada**, não excluída; excluir só serve para conta cadastrada por engano, ainda sem nenhum ciclo descontado, ou seja, uma conta que começa no ciclo atual ou depois. Uma conta que começou num ciclo anterior só pode ser encerrada.
 - **RN05** — Editar o valor de uma conta afeta o ciclo atual e os futuros, nunca ciclos já fechados.
 
 **Reserva e meta de investimento**
@@ -126,8 +126,8 @@ Sete tabelas no Room e um arquivo de configurações no DataStore. Valores em ce
 
 | Entidade | Campos | Observações |
 | --- | --- | --- |
-| Entrada | id, descricao, valorCentavos, tipo (RECORRENTE / AVULSA), dataInicio, dataFim? | Recorrente entra nos ciclos cujo primeiro dia cai entre dataInicio e dataFim, inclusive (a favor da segurança: um salário novo só conta a partir do primeiro pagamento); no primeiro uso, a dataInicio do salário é o início do ciclo atual. Avulsa só no ciclo da sua data |
-| ContaFixa | id, descricao, valorCentavos, diaVencimento, cicloInicio, duracaoMeses?, encerradaEm? | duracaoMeses nulo = sem fim (RN04) |
+| Entrada | id, descricao, valorCentavos, tipo (RECORRENTE / AVULSA), dataInicio, dataFim? | Recorrente entra nos ciclos cujo primeiro dia cai entre dataInicio e dataFim, inclusive (a favor da segurança: um salário novo só conta a partir do primeiro pagamento); no cadastro, a dataInicio da recorrente vem preenchida com o início do ciclo atual. Avulsa só no ciclo da sua data, que fica entre o início do ciclo atual e hoje, como nos gastos (RN14) |
+| ContaFixa | id, descricao, valorCentavos, diaVencimento, cicloInicio, duracaoMeses?, encerradaEm? | duracaoMeses nulo = sem fim (RN04). No cadastro, uma conta com duração informa a parcela do ciclo atual (ex.: parcela 3 de 10), e o cicloInicio fica (parcela − 1) ciclos antes do atual; conta sem fim começa no ciclo atual |
 | Gasto | id, descricao, valorCentavos, data, categoriaId, criadoEm | categoriaId é chave estrangeira |
 | Categoria | id, nome, icone | Vem com categorias padrão (Alimentação, Transporte, Lazer, Saúde, Outros) |
 | MetaReserva | id, nome, tipo (VALOR / PERCENTUAL), valor, ativa | valor em centavos ou pontos-base, conforme o tipo |
