@@ -57,11 +57,17 @@ fun Entrada.entraEm(ciclo: Ciclo): Boolean = when (tipo) {
  * ciclo, ainda vale nele e sai a partir do seguinte.
  */
 fun ContaFixa.ativaEm(ciclo: Ciclo): Boolean {
-    val meses = ChronoUnit.MONTHS.between(YearMonth.from(cicloInicio), YearMonth.from(ciclo.inicio))
+    val meses = mesesDesdeOInicio(ciclo)
     return meses >= 0 &&
         (duracaoMeses == null || meses < duracaoMeses) &&
         (encerradaEm == null || encerradaEm >= ciclo.inicio)
 }
+
+/** RN03: número da parcela em [ciclo] (1 no ciclo de início), ou null para conta sem fim. */
+fun ContaFixa.parcelaEm(ciclo: Ciclo): Int? = duracaoMeses?.let { mesesDesdeOInicio(ciclo).toInt() + 1 }
+
+private fun ContaFixa.mesesDesdeOInicio(ciclo: Ciclo) =
+    ChronoUnit.MONTHS.between(YearMonth.from(cicloInicio), YearMonth.from(ciclo.inicio))
 
 /** RN06: valor que a meta reserva no ciclo. O percentual arredonda para cima (exceção da RN13). */
 fun MetaReserva.valorNoCiclo(entradasCentavos: Long): Long = when (tipo) {

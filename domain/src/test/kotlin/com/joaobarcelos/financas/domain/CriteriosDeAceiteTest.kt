@@ -7,7 +7,10 @@ import com.joaobarcelos.financas.domain.calculadora.limiteSemanal
 import com.joaobarcelos.financas.domain.model.Gasto
 import com.joaobarcelos.financas.domain.model.MetaReserva
 import com.joaobarcelos.financas.domain.model.TipoMeta
+import com.joaobarcelos.financas.domain.usecase.Decisao
+import com.joaobarcelos.financas.domain.usecase.ErroCadastro
 import com.joaobarcelos.financas.domain.usecase.ErroGasto
+import com.joaobarcelos.financas.domain.usecase.decidirMeta
 import com.joaobarcelos.financas.domain.usecase.validarGasto
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -43,8 +46,8 @@ class CriteriosDeAceiteTest {
 
     @Test
     fun `CA04 meta de 2000 reais em outubro e bloqueada porque faltam 500 reais`() {
-        val comMetaNova = base.copy(metas = base.metas + MetaReserva(TipoMeta.VALOR, 200_000))
-        assertEquals(50_000, comMetaNova.resumo(outubro).faltaParaMetas)
+        val metaNova = MetaReserva(TipoMeta.VALOR, 200_000, nome = "Viagem")
+        assertEquals(Decisao.Bloqueado(ErroCadastro.METAS_NAO_CABEM, 50_000), decidirMeta(metaNova, base, outubro))
     }
 
     @Test
