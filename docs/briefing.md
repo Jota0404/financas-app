@@ -1,6 +1,6 @@
 # Briefing — Fôlego, app de finanças pessoais (Android)
 
-Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16).
+Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17).
 
 ## Visão geral
 
@@ -82,7 +82,7 @@ Todos os termos são do ciclo atual, em centavos.
 **Contas fixas**
 
 - **RN03** — Uma conta fixa com duração de N meses está ativa nos N ciclos a partir do ciclo de início, inclusive. Depois disso, é encerrada automaticamente e para de ser descontada. Os ciclos são contados pelo mês em que começam: com 3 meses a partir de outubro, a conta vale em todo ciclo que começa em outubro, novembro ou dezembro. Se uma mudança do dia do pagamento (RN01) criar dois ciclos no mesmo mês, a conta é descontada nos dois, assim como o salário entra nos dois. Limitação conhecida e aceita: uma mudança do fim para o começo do mês pode pular um mês (ex.: de 31 para 1 em 05/02/2027 gera os ciclos 31/01–28/02 e 01/03–31/03, e nenhum começa em fevereiro), e aí a conta é descontada uma vez a menos.
-- **RN04** — Conta com duração "sem fim" fica ativa até o usuário encerrá-la manualmente. Uma conta encerrada no meio de um ciclo ainda é descontada nele e sai a partir do ciclo seguinte, a favor da segurança, porque a conta daquele ciclo pode já ter sido paga.
+- **RN04** — Conta com duração "sem fim" fica ativa até o usuário encerrá-la manualmente. Uma conta encerrada no meio de um ciclo ainda é descontada nele e sai a partir do ciclo seguinte, a favor da segurança, porque a conta daquele ciclo pode já ter sido paga. Na tela, uma conta fixa que já foi descontada em algum ciclo é **encerrada**, não excluída; excluir só serve para conta cadastrada por engano, ainda sem nenhum ciclo descontado.
 - **RN05** — Editar o valor de uma conta afeta o ciclo atual e os futuros, nunca ciclos já fechados.
 
 **Reserva e meta de investimento**

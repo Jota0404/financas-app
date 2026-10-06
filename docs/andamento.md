@@ -136,6 +136,11 @@ backup de um app que já foi aberto pelo menos uma vez depois de instalado.
   configurações depois de uma mudança do dia do pagamento (o dono escolheu guardar também o fim,
   porque só o início não identifica o ciclo); limitação aceita da mudança que pula um mês (RN03);
   o que "fixo" quer dizer no limite semanal (RN11).
+- Revisão do QA da Etapa 3 ([`qa/2026-10-06-etapa-3.md`](qa/2026-10-06-etapa-3.md)): aprovada com
+  ressalvas, sem itens Críticos ou Altos. O M1 (salvar configurações com o arquivo do DataStore
+  corrompido) fica para o começo da Etapa 4; B1 e B2 para a Etapa 6. Decisão do dono sobre a P17,
+  registrada no briefing (RN04): conta fixa que já foi descontada é encerrada, não excluída;
+  excluir só serve para conta cadastrada por engano.
 - Atalho do Ponytail da Etapa 2 (campos dos modelos) resolvido nesta etapa. Novo atalho:
   `FinancasDao.kt:30` carrega os gastos de todos os ciclos; filtrar por data se o histórico pesar.
 - O GitHub avisou que o runner `ubuntu-latest` passa para o Ubuntu 26 a partir de 19/10/2026.
