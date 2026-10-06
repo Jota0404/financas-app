@@ -48,6 +48,8 @@ Pacote base: `com.joaobarcelos.financas`.
   ou de interface só quando a regra depende do Android (hoje: RN16 e CA12).
   Exemplo: `` `RN13 divisao em centavos arredonda para baixo`() ``,
   `` `CA06 limite de 1000 reais em 3 semanas e 333,33`() ``.
+- Teste de caso de erro (arquivo estragado, dado inválido) precisa provocar o erro de verdade:
+  confira que ele **falha** quando a proteção é retirada.
 - Testes do domínio ficam em `domain/src/test/kotlin/com/joaobarcelos/financas/domain/`.
 - Em `app/src/androidTest`, nome de teste **sem espaço** (com minSdk 26 o build quebra):
   `` `CA12_registrar_gasto_em_ate_3_toques`() ``.
