@@ -8,3 +8,8 @@ local.properties
 build/
 .idea/
 .kotlin/
+
+# Assinatura do APK final: a chave e a senha ficam só no Mac do dono, nunca no Git
+keystore.properties
+*.jks
+*.keystore

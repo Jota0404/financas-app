@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -23,8 +25,25 @@ android {
         testInstrumentationRunner = "com.joaobarcelos.financas.HiltTestRunner"
     }
 
+    // Assinatura do APK final. A chave e a senha ficam fora do Git, em keystore.properties (na raiz do
+    // projeto, ignorado pelo Git). Sem esse arquivo, como no GitHub Actions, o release sai sem assinatura.
+    val assinatura = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { arquivo ->
+        Properties().apply { arquivo.inputStream().use(::load) }
+    }
+    signingConfigs {
+        if (assinatura != null) {
+            create("release") {
+                storeFile = file(assinatura.getProperty("storeFile"))
+                storePassword = assinatura.getProperty("storePassword")
+                keyAlias = assinatura.getProperty("keyAlias")
+                keyPassword = assinatura.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (assinatura != null) signingConfig = signingConfigs.getByName("release")
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
