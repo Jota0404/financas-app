@@ -143,8 +143,8 @@ fun CampoTexto(
     rotulo: String,
     valor: String,
     aoMudar: (String) -> Unit,
-    teclado: KeyboardType = KeyboardType.Text,
     modifier: Modifier = Modifier,
+    teclado: KeyboardType = KeyboardType.Text,
 ) {
     OutlinedTextField(
         value = valor,

@@ -107,7 +107,7 @@ fun FormularioGasto(gasto: Gasto?, aoFechar: () -> Unit, vm: GastoViewModel = hi
             }
         },
     ) {
-        CampoTexto("Valor (R$)", valor, { valor = it }, KeyboardType.Decimal, Modifier.focusRequester(focoNoValor))
+        CampoTexto("Valor (R$)", valor, { valor = it }, teclado = KeyboardType.Decimal, modifier = Modifier.focusRequester(focoNoValor))
         CampoTexto("Descrição (opcional)", descricao, { descricao = it })
         Text("Categoria", style = MaterialTheme.typography.labelLarge)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

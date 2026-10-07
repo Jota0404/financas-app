@@ -117,12 +117,12 @@ fun FormularioConta(conta: ContaFixa?, ciclo: Ciclo, podeExcluir: Boolean, vm: C
         },
     ) {
         CampoTexto("Nome (ex.: Aluguel)", descricao, { descricao = it })
-        CampoTexto("Valor (R$)", valor, { valor = it }, KeyboardType.Decimal)
-        CampoTexto("Dia do vencimento", vencimento, { vencimento = it }, KeyboardType.Number)
+        CampoTexto("Valor (R$)", valor, { valor = it }, teclado = KeyboardType.Decimal)
+        CampoTexto("Dia do vencimento", vencimento, { vencimento = it }, teclado = KeyboardType.Number)
         LinhaComChave("Sem fim", semFim) { semFim = it }
         if (!semFim) {
-            CampoTexto("Duração (meses)", duracao, { duracao = it }, KeyboardType.Number)
-            if (conta == null) CampoTexto("Parcela deste ciclo", parcela, { parcela = it }, KeyboardType.Number)
+            CampoTexto("Duração (meses)", duracao, { duracao = it }, teclado = KeyboardType.Number)
+            if (conta == null) CampoTexto("Parcela deste ciclo", parcela, { parcela = it }, teclado = KeyboardType.Number)
         }
     }
 
@@ -184,7 +184,7 @@ fun FormularioEntrada(entrada: Entrada?, ciclo: Ciclo, hoje: LocalDate, vm: Entr
             tipo = it
         }
         CampoTexto(if (tipo == TipoEntrada.RECORRENTE) "Nome (ex.: Salário)" else "Nome (ex.: Freela)", descricao, { descricao = it })
-        CampoTexto("Valor (R$)", valor, { valor = it }, KeyboardType.Decimal)
+        CampoTexto("Valor (R$)", valor, { valor = it }, teclado = KeyboardType.Decimal)
         if (tipo == TipoEntrada.RECORRENTE) {
             CampoData("Entra a partir de", inicio, { inicio = it })
             CampoData("Até", fim, { fim = it }, aoLimpar = { fim = null })
@@ -241,7 +241,7 @@ fun FormularioMeta(meta: MetaReserva?, vm: MetasViewModel, aoFechar: () -> Unit)
     ) {
         CampoTexto("Nome (ex.: Reserva de segurança)", nome, { nome = it })
         Escolha(listOf(TipoMeta.PERCENTUAL to "% das entradas", TipoMeta.VALOR to "Valor fixo"), tipo) { tipo = it }
-        CampoTexto(if (tipo == TipoMeta.PERCENTUAL) "Percentual (%)" else "Valor (R$)", valor, { valor = it }, KeyboardType.Decimal)
+        CampoTexto(if (tipo == TipoMeta.PERCENTUAL) "Percentual (%)" else "Valor (R$)", valor, { valor = it }, teclado = KeyboardType.Decimal)
         LinhaComChave("Ativa", ativa) { ativa = it }
     }
 
