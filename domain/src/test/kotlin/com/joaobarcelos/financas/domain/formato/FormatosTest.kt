@@ -58,5 +58,6 @@ class FormatosTest {
     @Test
     fun `data no formato brasileiro`() {
         assertEquals("06/10/2026", formatarData(data(6, 10)))
+        assertEquals("06/10", formatarDiaMes(data(6, 10)))
     }
 }

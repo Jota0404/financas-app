@@ -45,3 +45,8 @@ private val formatoData = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
 /** 2026-10-06 vira "06/10/2026". */
 fun formatarData(data: LocalDate): String = data.format(formatoData)
+
+private val formatoDiaMes = DateTimeFormatter.ofPattern("dd/MM")
+
+/** 2026-10-06 vira "06/10". */
+fun formatarDiaMes(data: LocalDate): String = data.format(formatoDiaMes)

@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -28,6 +27,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.joaobarcelos.financas.ui.cadastros.CadastrosTela
+import com.joaobarcelos.financas.ui.historico.HistoricoTela
+import com.joaobarcelos.financas.ui.inicio.InicioTela
 
 enum class Aba(val titulo: String, val icone: ImageVector) {
     INICIO("Início", Icons.Filled.Home),
@@ -56,10 +57,8 @@ fun FolegoApp() {
     ) { espaco ->
         Box(Modifier.padding(espaco)) {
             when (aba) {
-                Aba.INICIO -> EmBreve("O disponível da semana chega na Etapa 5. Comece pelos seus cadastros.") {
-                    Button(onClick = { aba = Aba.CADASTROS }) { Text("Ir para Cadastros") }
-                }
-                Aba.HISTORICO -> EmBreve("O histórico de gastos e de ciclos chega na Etapa 5.")
+                Aba.INICIO -> InicioTela(aoIrParaCadastros = { aba = Aba.CADASTROS })
+                Aba.HISTORICO -> HistoricoTela()
                 Aba.CADASTROS -> CadastrosTela()
                 Aba.CONFIGURACOES -> EmBreve("As configurações chegam na Etapa 7.")
             }
@@ -67,15 +66,14 @@ fun FolegoApp() {
     }
 }
 
-// ponytail: aviso de "em breve" no lugar das abas que ainda não existem; sai quando cada tela chegar
+// ponytail: aviso de "em breve" no lugar das Configurações; sai na Etapa 7
 @Composable
-private fun EmBreve(texto: String, acao: @Composable () -> Unit = {}) {
+private fun EmBreve(texto: String) {
     Column(
         Modifier.fillMaxSize().padding(32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(texto, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
-        acao()
     }
 }
