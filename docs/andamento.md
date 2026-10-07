@@ -2,8 +2,8 @@
 
 Atualizado em 07/10/2026.
 
-**Etapa atual:** 7 de 7 (Onboarding, configurações e acabamento) concluída e entregue ao QA.
-Aguarda a revisão do QA e a aprovação do dono. É a última etapa do roteiro.
+**Projeto concluído:** as 7 etapas do roteiro do MVP foram entregues, revisadas pelo QA e aprovadas
+pelo dono (a última em 07/10/2026).
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -17,7 +17,7 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | 4. Cadastros | ✅ Concluída e aprovada em 06/10/2026 |
 | 5. Gastos e Início | ✅ Concluída e aprovada em 06/10/2026 |
 | 6. Alertas e fechamento de ciclo | ✅ Concluída e aprovada em 07/10/2026 |
-| 7. Onboarding, configurações e acabamento | 🔍 Concluída em 07/10/2026, aguardando QA e aprovação |
+| 7. Onboarding, configurações e acabamento | ✅ Concluída e aprovada em 07/10/2026 |
 
 ## O que já existe (Etapa 1)
 
@@ -288,7 +288,14 @@ corrigido, e o APK final passou a ser conferido no emulador.
 - **Antes de instalar o APK final no celular:** o app instalado pelo botão Run (versão de teste) tem
   outra assinatura, e o Android só aceita a troca desinstalando, o que apaga os dados. Guarde também
   uma cópia da chave (`~/.android/folego-release.jks`) e do `keystore.properties` num lugar seguro.
+- Revisão do QA da Etapa 7 ([`qa/2026-10-07-etapa-7.md`](qa/2026-10-07-etapa-7.md)): aprovada com
+  ressalvas, sem itens Críticos, Altos ou Médios. O APK final assinado foi conferido no emulador. As
+  duas ressalvas foram resolvidas depois da aprovação: o script de cobertura conta só as RN e os CA
+  definidos no briefing e avisa se não achar nenhum (B1 das Etapas 6 e 7), e o GitHub Actions também
+  gera o APK final, sem assinatura (B2).
 
 ## Próximo passo
 
-Revisão do QA da Etapa 7 e aprovação do dono. É a última etapa do roteiro do MVP.
+O roteiro do MVP terminou. Ficam com o dono: guardar a cópia da chave e da senha fora do Mac e
+instalar o APK final no celular antes de começar a usar o app de verdade. Melhorias depois do MVP
+(as "versões futuras" do briefing) começam por uma conversa no chat do Briefing.
