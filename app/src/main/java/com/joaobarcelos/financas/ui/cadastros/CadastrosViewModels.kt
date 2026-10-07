@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joaobarcelos.financas.domain.calculadora.Orcamento
 import com.joaobarcelos.financas.domain.calculadora.ativaEm
-import com.joaobarcelos.financas.domain.calculadora.cicloAtual
 import com.joaobarcelos.financas.domain.calculadora.parcelaEm
 import com.joaobarcelos.financas.domain.calculadora.valorNoCiclo
 import com.joaobarcelos.financas.domain.model.Ciclo
@@ -17,11 +16,12 @@ import com.joaobarcelos.financas.domain.repository.OrcamentoRepository
 import com.joaobarcelos.financas.domain.usecase.Cadastros
 import com.joaobarcelos.financas.domain.usecase.Decisao
 import com.joaobarcelos.financas.domain.usecase.decidirExclusao
+import com.joaobarcelos.financas.ui.momento
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.time.Clock
 import java.time.LocalDate
@@ -37,11 +37,10 @@ abstract class CadastroViewModel<E>(
 ) : ViewModel() {
     fun hoje(): LocalDate = LocalDate.now(relogio)
 
-    /** Nulo enquanto carrega. */
-    val estado: StateFlow<E?> = combine(orcamento.orcamento(), configuracoes.configuracoes()) { dados, config ->
-        val hoje = hoje()
-        paraEstado(config.cicloAtual(hoje), hoje, dados)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    /** Nulo enquanto carrega. Recalcula na virada do dia (QA Etapa 4, B2). */
+    val estado: StateFlow<E?> = momento(orcamento, configuracoes, relogio)
+        .map { paraEstado(it.ciclo, it.hoje, it.dados) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Termina de salvar mesmo se a tela for refeita no meio (ex.: girar o celular). */
     protected suspend fun <T> ateOFim(acao: suspend () -> T): T = viewModelScope.async { acao() }.await()

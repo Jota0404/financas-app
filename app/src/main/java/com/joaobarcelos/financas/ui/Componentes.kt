@@ -1,4 +1,4 @@
-package com.joaobarcelos.financas.ui.cadastros
+package com.joaobarcelos.financas.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -74,12 +74,16 @@ fun textoDoBloqueio(bloqueio: Decisao.Bloqueado): String = when (bloqueio.erro) 
 /** Aplica a decisão do domínio: fecha, mostra o aviso da RN08 ou mostra o motivo do bloqueio. */
 class EstadoFormulario(private val aoFechar: () -> Unit) {
     var erro by mutableStateOf<String?>(null)
-    var aviso by mutableStateOf<Long?>(null)
+    var aviso by mutableStateOf<String?>(null)
 
     fun aplicar(decisao: Decisao) {
         when (decisao) {
             Decisao.Permitido -> aoFechar()
-            is Decisao.PermitidoComAviso -> aviso = decisao.faltaParaMetas
+            is Decisao.PermitidoComAviso -> aviso =
+                "Suas metas de reserva passam do que sobra das entradas depois das contas fixas. " +
+                "Faltam ${formatarReais(decisao.faltaParaMetas)}."
+            is Decisao.PermitidoComReservaInvadida -> aviso =
+                "Este gasto invadiu a reserva. A reserva deste ciclo está invadida em ${formatarReais(decisao.reservaInvadida)}."
             is Decisao.Bloqueado -> erro = textoDoBloqueio(decisao)
         }
     }
@@ -124,30 +128,31 @@ fun Formulario(
             }
         }
     }
-    estado.aviso?.let { falta ->
+    estado.aviso?.let { aviso ->
         AlertDialog(
             onDismissRequest = estado::fechar,
             title = { Text("Salvo, mas atenção") },
-            text = {
-                Text(
-                    "Suas metas de reserva passam do que sobra das entradas depois das contas fixas. " +
-                        "Faltam ${formatarReais(falta)}.",
-                )
-            },
+            text = { Text(aviso) },
             confirmButton = { TextButton(onClick = estado::fechar) { Text("Entendi") } },
         )
     }
 }
 
 @Composable
-fun CampoTexto(rotulo: String, valor: String, aoMudar: (String) -> Unit, teclado: KeyboardType = KeyboardType.Text) {
+fun CampoTexto(
+    rotulo: String,
+    valor: String,
+    aoMudar: (String) -> Unit,
+    teclado: KeyboardType = KeyboardType.Text,
+    modifier: Modifier = Modifier,
+) {
     OutlinedTextField(
         value = valor,
         onValueChange = aoMudar,
         label = { Text(rotulo) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = teclado),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     )
 }
 
