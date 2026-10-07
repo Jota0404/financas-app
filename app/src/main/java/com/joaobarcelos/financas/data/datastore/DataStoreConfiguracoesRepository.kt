@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
@@ -61,6 +62,7 @@ class DataStoreConfiguracoesRepository @Inject constructor(
         val PERCENTUAL_ATENCAO = intPreferencesKey("percentual_atencao")
         val PERCENTUAL_CRITICO = intPreferencesKey("percentual_critico")
         val HORA_RESUMO = stringPreferencesKey("hora_resumo")
+        val PRIMEIRO_USO_CONCLUIDO = booleanPreferencesKey("primeiro_uso_concluido")
     }
 
     private fun Preferences.paraConfiguracoes(): Configuracoes {
@@ -74,6 +76,7 @@ class DataStoreConfiguracoesRepository @Inject constructor(
             percentualAtencao = this[Chaves.PERCENTUAL_ATENCAO] ?: padrao.percentualAtencao,
             percentualCritico = this[Chaves.PERCENTUAL_CRITICO] ?: padrao.percentualCritico,
             horaResumo = this[Chaves.HORA_RESUMO]?.let(LocalTime::parse) ?: padrao.horaResumo,
+            primeiroUsoConcluido = this[Chaves.PRIMEIRO_USO_CONCLUIDO] ?: padrao.primeiroUsoConcluido,
         )
     }
 
@@ -85,6 +88,7 @@ class DataStoreConfiguracoesRepository @Inject constructor(
         this[Chaves.PERCENTUAL_ATENCAO] = c.percentualAtencao
         this[Chaves.PERCENTUAL_CRITICO] = c.percentualCritico
         this[Chaves.HORA_RESUMO] = c.horaResumo.toString()
+        this[Chaves.PRIMEIRO_USO_CONCLUIDO] = c.primeiroUsoConcluido
     }
 
     private fun <T> MutablePreferences.gravarOuApagar(chave: Preferences.Key<T>, valor: T?) {

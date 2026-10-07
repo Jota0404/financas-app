@@ -67,6 +67,9 @@ fun textoDoBloqueio(bloqueio: Decisao.Bloqueado): String = when (bloqueio.erro) 
     ErroCadastro.METAS_NAO_CABEM ->
         "Esta meta não cabe: faltam ${formatarReais(bloqueio.faltaParaMetas)} para ela ser viável."
     ErroCadastro.CONTA_SAIRIA_DO_CICLO -> "Para tirar a conta deste ciclo, encerre."
+    ErroCadastro.DIA_PAGAMENTO_INVALIDO -> "O dia do pagamento vai de 1 a 31."
+    ErroCadastro.PERCENTUAL_FORA_DA_FAIXA -> "A atenção vai de 1% a 99%, e o crítico, de 2% a 100%."
+    ErroCadastro.ATENCAO_NAO_MENOR_QUE_CRITICO -> "O percentual de atenção precisa ser menor que o crítico."
     ErroCadastro.CONTA_JA_DESCONTADA ->
         "Esta conta já foi descontada em ciclos anteriores. Encerre a conta em vez de excluir."
 }

@@ -147,7 +147,7 @@ Sete tabelas no Room e um arquivo de configurações no DataStore. Valores em ce
 | CicloFechado | id, inicio, fim, totalEntradas, totalFixas, totalReserva, totalGastos, reservaInvadidaCentavos | Retrato do ciclo no fechamento; garante a RN05 |
 | RegistroAlerta | id, codigo, periodoRef, disparadoEm | Impede alerta duplicado no mesmo período |
 
-**Configurações (DataStore):** diaPagamento, inicioCicloAtual?, fimCicloAtual?, limiteSemanalManual?, percentualAtencao, percentualCritico, horaResumo. `inicioCicloAtual` e `fimCicloAtual` guardam o ciclo atual quando uma mudança do dia do pagamento (RN01) o deixa diferente do normal; depois do `fimCicloAtual`, o ciclo volta a sair só do `diaPagamento`. Só o início não basta: mudar de 1 para 15 em 10/10 ou em 20/10 dá ciclos que começam em 01/10 e terminam em 14/10 ou em 14/11.
+**Configurações (DataStore):** diaPagamento, inicioCicloAtual?, fimCicloAtual?, limiteSemanalManual?, percentualAtencao, percentualCritico, horaResumo, primeiroUsoConcluido (o assistente de primeiro uso foi concluído ou pulado). `inicioCicloAtual` e `fimCicloAtual` guardam o ciclo atual quando uma mudança do dia do pagamento (RN01) o deixa diferente do normal; depois do `fimCicloAtual`, o ciclo volta a sair só do `diaPagamento`. Só o início não basta: mudar de 1 para 15 em 10/10 ou em 20/10 dá ciclos que começam em 01/10 e terminam em 14/10 ou em 14/11.
 
 Campos com **?** são opcionais (nuláveis).
 

@@ -29,6 +29,9 @@ enum class ErroCadastro {
     METAS_NAO_CABEM,
     CONTA_JA_DESCONTADA,
     CONTA_SAIRIA_DO_CICLO,
+    DIA_PAGAMENTO_INVALIDO,
+    PERCENTUAL_FORA_DA_FAIXA,
+    ATENCAO_NAO_MENOR_QUE_CRITICO,
 }
 
 /** O que fazer com um cadastro. A tela só aplica a decisão. */

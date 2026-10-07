@@ -59,6 +59,7 @@ class DataStoreConfiguracoesRepositoryTest {
             percentualAtencao = 6000,
             percentualCritico = 8500,
             horaResumo = LocalTime.of(7, 30),
+            primeiroUsoConcluido = true,
         )
         abrir().atualizar { gravada }
         assertEquals(gravada, abrir().configuracoes().first())

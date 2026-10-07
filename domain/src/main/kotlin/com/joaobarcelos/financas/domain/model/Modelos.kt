@@ -99,4 +99,6 @@ data class Configuracoes(
     val percentualAtencao: Int = 7000,
     val percentualCritico: Int = 9000,
     val horaResumo: LocalTime = LocalTime.of(8, 0),
+    /** O assistente de primeiro uso foi concluído (tela 1). */
+    val primeiroUsoConcluido: Boolean = false,
 )
