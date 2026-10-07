@@ -56,6 +56,9 @@ Pacote base: `com.joaobarcelos.financas`.
 - Testes do domínio ficam em `domain/src/test/kotlin/com/joaobarcelos/financas/domain/`.
 - Em `app/src/androidTest`, nome de teste **sem espaço** (com minSdk 26 o build quebra):
   `` `CA12_registrar_gasto_em_ate_3_toques`() ``.
+- Testes no aparelho (`connectedDebugAndroidTest`) **desinstalam o app no fim e apagam os dados
+  dele**: rodar só no emulador, com `ANDROID_SERIAL=emulator-5554`, nunca com o celular do dono
+  conectado. E esses testes usam banco em memória, nunca o banco real do app.
 - Antes de cada push, rodar `/verificar` (build, testes e GitHub Actions). Gradle à mão neste Mac
   precisa de `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
 
