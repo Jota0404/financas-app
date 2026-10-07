@@ -6,6 +6,7 @@ import com.joaobarcelos.financas.domain.calculadora.cicloAtual
 import com.joaobarcelos.financas.domain.model.Ciclo
 import com.joaobarcelos.financas.domain.model.ContaFixa
 import com.joaobarcelos.financas.domain.model.Entrada
+import com.joaobarcelos.financas.domain.model.Gasto
 import com.joaobarcelos.financas.domain.model.MetaReserva
 import com.joaobarcelos.financas.domain.model.TipoEntrada
 import com.joaobarcelos.financas.domain.model.TipoMeta
@@ -35,6 +36,9 @@ sealed interface Decisao {
 
     /** RN08: salva, mas avisa quanto falta para as metas caberem em Entradas − Contas fixas. */
     data class PermitidoComAviso(val faltaParaMetas: Long) : Decisao
+
+    /** RN09: o gasto é salvo, mas a reserva do ciclo fica invadida em [reservaInvadida]. */
+    data class PermitidoComReservaInvadida(val reservaInvadida: Long) : Decisao
 
     /** [faltaParaMetas] só é preenchido no erro METAS_NAO_CABEM (RN08). */
     data class Bloqueado(val erro: ErroCadastro, val faltaParaMetas: Long = 0) : Decisao
@@ -108,6 +112,30 @@ fun decidirMeta(meta: MetaReserva, orcamento: Orcamento, cicloAtual: Ciclo): Dec
 fun decidirExclusao(conta: ContaFixa, cicloAtual: Ciclo): Decisao =
     if (conta.cicloInicio >= cicloAtual.inicio) Decisao.Permitido else Decisao.Bloqueado(ErroCadastro.CONTA_JA_DESCONTADA)
 
+/**
+ * RN14, RN15 e RN09 para salvar um gasto, novo ou editado. Um gasto de ciclo fechado não pode ser
+ * mudado. Se a reserva fica invadida, salva e avisa quanto.
+ */
+fun decidirGasto(gasto: Gasto, orcamento: Orcamento, cicloAtual: Ciclo, hoje: LocalDate): Decisao {
+    val original = orcamento.gastos.find { gasto.id != 0L && it.id == gasto.id }
+    val erro = when {
+        original != null && original.data < cicloAtual.inicio -> ErroCadastro.DATA_EM_CICLO_FECHADO
+        else -> when (validarGasto(gasto, cicloAtual, hoje)) {
+            ErroGasto.VALOR_ZERO_OU_NEGATIVO -> ErroCadastro.VALOR_ZERO_OU_NEGATIVO
+            ErroGasto.DATA_EM_CICLO_FECHADO -> ErroCadastro.DATA_EM_CICLO_FECHADO
+            ErroGasto.DATA_FUTURA -> ErroCadastro.DATA_FUTURA
+            null -> null
+        }
+    }
+    if (erro != null) return Decisao.Bloqueado(erro)
+    val invadida = orcamento.copy(gastos = orcamento.gastos.comItem(gasto) { it.id }).resumo(cicloAtual).reservaInvadida
+    return if (invadida > 0) Decisao.PermitidoComReservaInvadida(invadida) else Decisao.Permitido
+}
+
+/** Um gasto de ciclo fechado não pode ser excluído: o ciclo já foi retratado (RN05). */
+fun decidirExclusao(gasto: Gasto, cicloAtual: Ciclo): Decisao =
+    if (gasto.data < cicloAtual.inicio) Decisao.Bloqueado(ErroCadastro.DATA_EM_CICLO_FECHADO) else Decisao.Permitido
+
 /** P18: uma avulsa de ciclo fechado é só para consulta e não pode ser excluída. */
 fun decidirExclusao(entrada: Entrada, cicloAtual: Ciclo): Decisao =
     if (entrada.tipo == TipoEntrada.AVULSA && entrada.dataInicio < cicloAtual.inicio) {
@@ -147,4 +175,10 @@ class Cadastros(
     suspend fun excluir(entrada: Entrada, hoje: LocalDate): Decisao =
         decidirExclusao(entrada, ciclo(hoje)).also { if (it is Decisao.Permitido) orcamento.excluir(entrada) }
     suspend fun excluir(meta: MetaReserva) = orcamento.excluir(meta)
+
+    suspend fun salvar(gasto: Gasto, hoje: LocalDate): Decisao =
+        decidirGasto(gasto, dados(), ciclo(hoje), hoje).also { if (it !is Decisao.Bloqueado) orcamento.salvar(gasto) }
+
+    suspend fun excluir(gasto: Gasto, hoje: LocalDate): Decisao =
+        decidirExclusao(gasto, ciclo(hoje)).also { if (it is Decisao.Permitido) orcamento.excluir(gasto) }
 }

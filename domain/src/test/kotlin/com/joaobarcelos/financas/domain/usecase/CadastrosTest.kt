@@ -202,6 +202,34 @@ class CadastrosTest {
         assertEquals(bloqueio(ErroCadastro.CONTA_JA_DESCONTADA), decidirExclusao(antiga, outubro))
     }
 
+    @Test
+    fun `CA03 gasto que invade a reserva e salvo com aviso de quanto`() {
+        // decisão do dono: avisa na hora; 1600 em outubro invade a reserva em 100
+        assertEquals(Decisao.PermitidoComReservaInvadida(10_000), decidirGasto(Gasto(160_000, data(5, 10)), base, outubro, hoje))
+        assertEquals(Decisao.Permitido, decidirGasto(Gasto(150_000, data(5, 10)), base, outubro, hoje))
+    }
+
+    @Test
+    fun `RN14 e RN15 valem ao criar e ao editar um gasto`() {
+        val almoco = Gasto(4_500, data(6, 10), descricao = "Almoço", id = 3)
+        val comAlmoco = base.copy(gastos = listOf(almoco))
+        assertEquals(Decisao.Permitido, decidirGasto(almoco.copy(valorCentavos = 5_400), comAlmoco, outubro, hoje))
+        assertEquals(bloqueio(ErroCadastro.VALOR_ZERO_OU_NEGATIVO), decidirGasto(almoco.copy(valorCentavos = 0), comAlmoco, outubro, hoje))
+        assertEquals(bloqueio(ErroCadastro.DATA_FUTURA), decidirGasto(almoco.copy(data = data(7, 10)), comAlmoco, outubro, hoje))
+        assertEquals(bloqueio(ErroCadastro.DATA_EM_CICLO_FECHADO), decidirGasto(almoco.copy(data = data(30, 9)), comAlmoco, outubro, hoje))
+        assertEquals(bloqueio(ErroCadastro.VALOR_ZERO_OU_NEGATIVO), decidirGasto(Gasto(0, hoje), base, outubro, hoje))
+    }
+
+    @Test
+    fun `RN05 gasto de ciclo fechado nao pode ser editado nem excluido`() {
+        val antigo = Gasto(2_000, data(28, 9), id = 4)
+        val comAntigo = base.copy(gastos = listOf(antigo))
+        // mesmo mudando a data para o ciclo atual
+        assertEquals(bloqueio(ErroCadastro.DATA_EM_CICLO_FECHADO), decidirGasto(antigo.copy(data = hoje), comAntigo, outubro, hoje))
+        assertEquals(bloqueio(ErroCadastro.DATA_EM_CICLO_FECHADO), decidirExclusao(antigo, outubro))
+        assertEquals(Decisao.Permitido, decidirExclusao(antigo.copy(data = data(1, 10)), outubro))
+    }
+
     // Repositórios em memória, para testar que o bloqueado não chega ao banco
     private class OrcamentoEmMemoria(inicial: Orcamento) : OrcamentoRepository {
         val dados = MutableStateFlow(inicial)
@@ -210,7 +238,7 @@ class CadastrosTest {
         override suspend fun salvar(entrada: Entrada) = 1L.also { dados.value = dados.value.copy(entradas = dados.value.entradas + entrada) }
         override suspend fun salvar(conta: ContaFixa) = 1L.also { dados.value = dados.value.copy(contas = dados.value.contas.filterNot { it.id == conta.id } + conta) }
         override suspend fun salvar(meta: MetaReserva) = 1L.also { dados.value = dados.value.copy(metas = dados.value.metas + meta) }
-        override suspend fun salvar(gasto: Gasto) = 1L
+        override suspend fun salvar(gasto: Gasto) = 1L.also { dados.value = dados.value.copy(gastos = dados.value.gastos + gasto) }
         override suspend fun excluir(entrada: Entrada) {}
         override suspend fun excluir(conta: ContaFixa) { dados.value = dados.value.copy(contas = dados.value.contas - conta) }
         override suspend fun excluir(meta: MetaReserva) {}
@@ -251,5 +279,13 @@ class CadastrosTest {
         // encerrar de novo não muda a data
         cadastros.encerrar(encerrado, data(20, 10))
         assertEquals(hoje, repositorio.orcamento().first().contas.single { it.id == aluguel.id }.encerradaEm)
+    }
+
+    @Test
+    fun `gasto bloqueado nao e salvo e gasto valido e salvo`() = runBlocking {
+        assertEquals(bloqueio(ErroCadastro.DATA_FUTURA), cadastros.salvar(Gasto(1_000, data(7, 10)), hoje))
+        assertEquals(0, repositorio.orcamento().first().gastos.size)
+        assertEquals(Decisao.Permitido, cadastros.salvar(Gasto(1_000, hoje), hoje))
+        assertEquals(1, repositorio.orcamento().first().gastos.size)
     }
 }
