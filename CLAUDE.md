@@ -40,6 +40,9 @@ Pacote base: `com.joaobarcelos.financas`.
 - Respeitar a direção das camadas: ui → domain → data. Tela nunca acessa banco direto.
 - Toda decisão de regra de negócio (bloquear, avisar, fechar ciclo) sai pronta do `:domain`, com
   teste. Tela e repositórios só aplicam o resultado, sem "quem chama precisa lembrar de...".
+- Regra que bloqueia criar ou excluir vale também para **editar**: teste o caminho de edição.
+- Campos de formulário e "qual formulário está aberto" usam `rememberSaveable`, para não se
+  perderem ao girar o celular.
 
 ## Testes
 
