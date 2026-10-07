@@ -42,8 +42,9 @@ sealed interface Decisao {
 private fun <T> List<T>.comItem(item: T, id: (T) -> Long) =
     filterNot { id(item) != 0L && id(it) == id(item) } + item
 
-/** RN08: depois de salvar uma conta ou entrada, avisa se as metas deixaram de caber. */
+/** RN08: depois de salvar uma conta ou entrada, avisa se as metas deixaram de caber. Sem meta ativa, não avisa. */
 private fun avisoDeMetas(depois: Orcamento, ciclo: Ciclo): Decisao {
+    if (depois.metas.none { it.ativa }) return Decisao.Permitido
     val falta = depois.resumo(ciclo).faltaParaMetas
     return if (falta > 0) Decisao.PermitidoComAviso(falta) else Decisao.Permitido
 }

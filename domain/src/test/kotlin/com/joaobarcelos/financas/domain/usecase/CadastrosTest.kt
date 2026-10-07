@@ -98,6 +98,17 @@ class CadastrosTest {
     }
 
     @Test
+    fun `RN08 sem meta ativa a conta e salva sem aviso`() {
+        // decisão do dono: aluguel cadastrado antes do salário e de qualquer meta não gera aviso
+        assertEquals(Decisao.Permitido, decidirConta(conta.copy(duracaoMeses = null), Orcamento(), outubro))
+        val soPausada = Orcamento(metas = listOf(meta.copy(ativa = false)))
+        assertEquals(Decisao.Permitido, decidirConta(conta.copy(duracaoMeses = null), soPausada, outubro))
+        // com uma meta ativa de 0,01 e sem entradas, o aviso volta: 0,01 - (0 - 300) = 300,01
+        val umCentavo = Orcamento(metas = listOf(meta.copy(valor = 1)))
+        assertEquals(Decisao.PermitidoComAviso(30_001), decidirConta(conta.copy(duracaoMeses = null), umCentavo, outubro))
+    }
+
+    @Test
     fun `RN08 entrada que deixa as metas sem caber salva com aviso`() {
         // salário editado para 1500: 1500 - 1200 = 300 e a reserva cai para 150, então cabe
         assertEquals(Decisao.Permitido, decidirEntrada(base.entradas[0].copy(valorCentavos = 150_000), base, outubro, hoje))
