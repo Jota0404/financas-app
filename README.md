@@ -41,7 +41,7 @@ financas-app/
 │   │   ├── local/dao/         consultas ao banco (DAOs)
 │   │   ├── datastore/         configurações salvas
 │   │   └── repository/        ponte entre o domínio e o banco/configurações
-│   ├── worker/                agendamento e disparo dos alertas (WorkManager)
+│   ├── worker/                rotina diária (WorkManager) e notificações dos alertas
 │   └── di/                    módulos do Hilt
 ├── app/src/test/java/com/joaobarcelos/financas/
 │   ├── data/                  testes do banco, dos repositórios e do DataStore (Robolectric, sem aparelho)
@@ -49,7 +49,8 @@ financas-app/
 ├── app/schemas/               esquema do banco a cada versão, base para as migrações do Room
 ├── app/src/androidTest/java/com/joaobarcelos/financas/
 │   ├── BackupTest.kt          teste no aparelho: backup automático ligado (RN16)
-│   └── RegistrarGastoTest.kt  teste no aparelho: registrar gasto em até 3 toques (CA12)
+│   ├── RegistrarGastoTest.kt  teste no aparelho: registrar gasto em até 3 toques (CA12)
+│   └── ArmazenamentoDeTeste.kt  banco em memória para os testes no aparelho (só no emulador)
 ├── domain/                    módulo :domain, regras de negócio em Kotlin puro (sem Android)
 │   ├── src/main/kotlin/com/joaobarcelos/financas/domain/
 │   │   ├── model/             modelos do domínio (Entrada, ContaFixa, Gasto...)

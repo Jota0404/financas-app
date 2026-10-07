@@ -1,9 +1,9 @@
 # Andamento do projeto
 
-Atualizado em 06/10/2026.
+Atualizado em 07/10/2026.
 
-**Etapa atual:** 5 de 7 (Gastos e Início) concluída e aprovada pelo dono. A próxima é a Etapa 6
-(Alertas e fechamento de ciclo).
+**Etapa atual:** 6 de 7 (Alertas e fechamento de ciclo) concluída e entregue ao QA. Aguarda a
+revisão do QA e a aprovação do dono antes da Etapa 7.
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -16,7 +16,7 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | 3. Persistência (Room, DAOs, DataStore) | ✅ Concluída e aprovada em 06/10/2026 |
 | 4. Cadastros | ✅ Concluída e aprovada em 06/10/2026 |
 | 5. Gastos e Início | ✅ Concluída e aprovada em 06/10/2026 |
-| 6. Alertas e fechamento de ciclo | ⏭️ Próxima |
+| 6. Alertas e fechamento de ciclo | 🔍 Concluída em 07/10/2026, aguardando QA e aprovação |
 | 7. Onboarding, configurações e acabamento | ⏳ Não iniciada |
 
 ## O que já existe (Etapa 1)
@@ -118,6 +118,32 @@ atualiza sozinha na virada do dia, com o app aberto ou ao voltar para ele.
 valor; um gasto de R$ 45,00 em 2 toques; e, com mais R$ 1.555,00 (total de R$ 1.600,00), o aviso
 "a reserva deste ciclo está invadida em R$ 100,00" (CA03). Temas claro e escuro sem travamentos.
 
+## O que já existe (Etapa 6)
+
+O app avisa sozinho e guarda o retrato de cada ciclo.
+
+| Alerta | Quando chega |
+| --- | --- |
+| A1 — Resumo da semana | Uma vez por semana, por volta das 08:00 de segunda; se a rotina de segunda não rodou, chega no primeiro dia em que ela rodar na mesma semana |
+| A2 — 70% do limite | Ao registrar um gasto que faz a semana atingir o percentual de atenção; uma vez por parte da semana |
+| A3 — 90% do limite | O mesmo, no percentual crítico; num salto direto, só o A3 chega (o A2 conta como enviado). Com limite zero, nem A2 nem A3 |
+| A4 — Reserva invadida | Ao registrar ou corrigir um gasto que aumenta a invasão da reserva; uma vez por gasto |
+| A5 — Ciclo fechado | No dia do pagamento, por volta das 08:00: quanto sobrou e quanto da reserva foi guardado. Um só, do ciclo mais recente, mesmo atrasado |
+
+- A decisão de cada alerta sai do domínio (`usecase/Alertas.kt`), e o registro de alertas
+  (RegistroAlerta) garante que nenhum se repete no mesmo período.
+- **Fechamento do ciclo (CicloFechado):** ao abrir o app e na rotina diária, os ciclos que já
+  terminaram ganham um retrato com os totais (RN05), inclusive os que terminaram com o app parado,
+  a partir do primeiro ciclo com gastos. O retrato guarda a reserva invadida do momento. O banco
+  (versão 2, com migração automática) recusa fechar o mesmo ciclo duas vezes.
+- **Rotina diária:** o WorkManager roda uma vez por dia, por volta do horário do resumo, e agenda o
+  dia seguinte. A permissão de notificação é pedida ao abrir o app (Android 13+); sem ela, os
+  alertas ficam registrados, mas não aparecem.
+
+**Visto no emulador (Android 17):** o pedido de permissão ao abrir o app; com salário de R$ 3.000,00
+e gastos de R$ 677,77 na semana (limite de R$ 777,77), a notificação "70% do limite da semana"; ao
+forçar a rotina diária, a notificação "Resumo da semana", que não se repetiu na segunda rodada.
+
 ## Versões principais
 
 | Item | Versão |
@@ -133,24 +159,26 @@ valor; um gasto de R$ 45,00 em 2 toques; e, com mais R$ 1.555,00 (total de R$ 1.
 | DataStore | 1.2.1 |
 | Lifecycle (Compose) | 2.11.0 |
 | Hilt para Compose | 1.4.0 |
+| WorkManager | 2.12.0 |
+| Hilt para workers | 1.4.0 |
 | Robolectric (testes) | 4.17 |
 | compileSdk / targetSdk | 37 |
 
 ## Testes
 
-- **Domínio:** 122 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
+- **Domínio:** 144 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
   RN de RN01 a RN15 tem teste com o código no nome, e os critérios CA01 a CA07, CA09, CA10 e
   CA13 a CA16 estão em `CriteriosDeAceiteTest.kt`, com o cenário base do briefing
-  (`CenarioBase.kt`) e os valores exatos em centavos.
-- **App:** 44 testes em `app/src/test/`: 17 de persistência (banco, repositórios e DataStore), 14 de
-  tela da aba Cadastros, 11 das telas Início, Novo gasto e Histórico (entre eles o CA12 e o CA03) e 2
-  da virada do dia. Rodam no computador com Robolectric, sem aparelho, e por isso também no GitHub
-  Actions.
+  (`CenarioBase.kt`) e os valores exatos em centavos. O CA08 e o CA11 estão em `AlertasTest.kt`.
+- **App:** 51 testes em `app/src/test/`: persistência (banco, repositórios, DataStore, migração
+  do banco e o CA11 com o banco de verdade), telas (Cadastros, Início, Novo gasto e Histórico, entre
+  eles o CA12 e o CA03), virada do dia, notificação e rotina diária. Rodam no computador com
+  Robolectric, sem aparelho, e por isso também no GitHub Actions.
 - **No aparelho:** 2 testes instrumentados, `BackupTest` (RN16) e `RegistrarGastoTest` (CA12, com o
-  app de verdade). Rodam **só no emulador**, com
-  `ANDROID_SERIAL=emulator-5554 ./gradlew connectedDebugAndroidTest`, porque o comando desinstala o
-  app no fim e apaga os dados dele. Não rodam no GitHub Actions, porque precisam de um aparelho.
-- **Ainda sem teste, como previsto:** CA08 e CA11 (Etapa 6, alertas e fechamento de ciclo).
+  app de verdade e o banco em memória, sem ler nem gravar os dados reais). Rodam **só no
+  emulador**: `ANDROID_SERIAL=emulator-5554 ./gradlew connectedDebugAndroidTest`. O app continua
+  instalado depois dos testes. Não rodam no GitHub Actions, porque precisam de um aparelho.
+- Todos os RN e CA do briefing têm teste.
 
 ## Pendências e observações
 
@@ -209,9 +237,16 @@ valor; um gasto de R$ 45,00 em 2 toques; e, com mais R$ 1.555,00 (total de R$ 1.
   ressalvas, sem itens Críticos ou Altos. **Atenção:** `connectedDebugAndroidTest` desinstala o app
   no fim e apaga os dados dele. Rodar só no emulador:
   `ANDROID_SERIAL=emulator-5554 ./gradlew connectedDebugAndroidTest`, nunca com o celular do dono
-  conectado. Ficam para o começo da Etapa 6: M1 (o teste do CA12 passa a usar banco em memória) e
-  B2 (fechar também os ciclos que terminaram antes da Etapa 6). O B1 (barra vermelha no primeiro
-  uso, sem cadastros) fica para a Etapa 6 ou para o onboarding da Etapa 7.
+  conectado. Corrigidos no começo da Etapa 6: M1 (o teste do CA12 usa banco em memória, e os testes
+  no aparelho não desinstalam mais o app), B1 (sem cadastros, o Início mostra só o convite) e B2
+  (ciclos que terminaram antes da Etapa 6 também são fechados). Da Etapa 3, B1 (o retrato guarda a
+  reserva invadida) e B2 (mudar o dia do pagamento fecha o ciclo junto).
+- Decisões do dono no começo da Etapa 6, registradas no briefing (seção Alertas): permissão na
+  primeira abertura; A1 e A5 por volta das 08:00; o A5 diz quanto foi guardado; com o app parado,
+  fecha tudo depois e manda um A5 só; só o A3 no salto; sem A2 e A3 com limite zero; A4 também ao
+  corrigir um gasto.
+- O retrato de um ciclo fechado com atraso usa os cadastros do momento do fechamento. Se uma conta
+  for editada antes de o app rodar na virada, a edição entra no retrato do ciclo anterior.
 - Atalhos do Ponytail: `FinancasDao.kt:30` carrega os gastos de todos os ciclos (filtrar por data
   se o histórico pesar); `FolegoApp.kt:69` mostra "em breve" no lugar das Configurações (sai na
   Etapa 7).
@@ -220,5 +255,6 @@ valor; um gasto de R$ 45,00 em 2 toques; e, com mais R$ 1.555,00 (total de R$ 1.
 
 ## Próximo passo
 
-Etapa 6 (Alertas e fechamento de ciclo): primeiro, as correções da revisão do QA da Etapa 5.
-Depois, WorkManager, notificações A1 a A5, RegistroAlerta e geração do CicloFechado (CA08 e CA11).
+Revisão do QA da Etapa 6 e aprovação do dono. Depois, a Etapa 7 (Onboarding, configurações e
+acabamento): primeiro uso (com o pedido de permissão de notificação), tela de Configurações, estados
+vazios, ícone e README final.
