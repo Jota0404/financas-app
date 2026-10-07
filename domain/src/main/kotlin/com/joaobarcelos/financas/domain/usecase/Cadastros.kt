@@ -13,6 +13,7 @@ import com.joaobarcelos.financas.domain.model.TipoMeta
 import com.joaobarcelos.financas.domain.repository.ConfiguracoesRepository
 import com.joaobarcelos.financas.domain.repository.OrcamentoRepository
 import kotlinx.coroutines.flow.first
+import java.time.Instant
 import java.time.LocalDate
 
 enum class ErroCadastro {
@@ -151,6 +152,7 @@ fun decidirExclusao(entrada: Entrada, cicloAtual: Ciclo): Decisao =
 class Cadastros(
     private val orcamento: OrcamentoRepository,
     private val configuracoes: ConfiguracoesRepository,
+    private val alertas: Alertas,
 ) {
     private suspend fun dados() = orcamento.orcamento().first()
     private suspend fun ciclo(hoje: LocalDate) = configuracoes.configuracoes().first().cicloAtual(hoje)
@@ -176,8 +178,13 @@ class Cadastros(
         decidirExclusao(entrada, ciclo(hoje)).also { if (it is Decisao.Permitido) orcamento.excluir(entrada) }
     suspend fun excluir(meta: MetaReserva) = orcamento.excluir(meta)
 
-    suspend fun salvar(gasto: Gasto, hoje: LocalDate): Decisao =
-        decidirGasto(gasto, dados(), ciclo(hoje), hoje).also { if (it !is Decisao.Bloqueado) orcamento.salvar(gasto) }
+    /** Salva o gasto e dispara os alertas que ele provocar (A2, A3 e A4). */
+    suspend fun salvar(gasto: Gasto, hoje: LocalDate, agora: Instant): Decisao {
+        val antes = dados()
+        val decisao = decidirGasto(gasto, antes, ciclo(hoje), hoje)
+        if (decisao !is Decisao.Bloqueado) alertas.depoisDoGasto(antes, orcamento.salvar(gasto), hoje, agora)
+        return decisao
+    }
 
     suspend fun excluir(gasto: Gasto, hoje: LocalDate): Decisao =
         decidirExclusao(gasto, ciclo(hoje)).also { if (it is Decisao.Permitido) orcamento.excluir(gasto) }

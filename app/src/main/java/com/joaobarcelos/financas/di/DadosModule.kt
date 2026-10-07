@@ -12,7 +12,10 @@ import com.joaobarcelos.financas.data.repository.RoomOrcamentoRepository
 import com.joaobarcelos.financas.domain.repository.ConfiguracoesRepository
 import com.joaobarcelos.financas.domain.repository.HistoricoRepository
 import com.joaobarcelos.financas.domain.repository.OrcamentoRepository
+import com.joaobarcelos.financas.domain.usecase.Alertas
 import com.joaobarcelos.financas.domain.usecase.Cadastros
+import com.joaobarcelos.financas.domain.usecase.Notificador
+import com.joaobarcelos.financas.worker.NotificacoesAndroid
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -29,6 +32,7 @@ abstract class DadosModule {
     @Binds abstract fun orcamento(repositorio: RoomOrcamentoRepository): OrcamentoRepository
     @Binds abstract fun historico(repositorio: RoomHistoricoRepository): HistoricoRepository
     @Binds abstract fun configuracoes(repositorio: DataStoreConfiguracoesRepository): ConfiguracoesRepository
+    @Binds abstract fun notificador(notificacoes: NotificacoesAndroid): Notificador
 
     companion object {
         @Provides
@@ -38,8 +42,16 @@ abstract class DadosModule {
         fun relogio(): Clock = Clock.systemDefaultZone()
 
         @Provides
-        fun cadastros(orcamento: OrcamentoRepository, configuracoes: ConfiguracoesRepository) =
-            Cadastros(orcamento, configuracoes)
+        fun alertas(
+            orcamento: OrcamentoRepository,
+            configuracoes: ConfiguracoesRepository,
+            historico: HistoricoRepository,
+            notificador: Notificador,
+        ) = Alertas(orcamento, configuracoes, historico, notificador)
+
+        @Provides
+        fun cadastros(orcamento: OrcamentoRepository, configuracoes: ConfiguracoesRepository, alertas: Alertas) =
+            Cadastros(orcamento, configuracoes, alertas)
     }
 }
 

@@ -63,7 +63,7 @@ class GastoViewModel @Inject constructor(
     fun hoje(): LocalDate = LocalDate.now(relogio)
 
     // Termina de salvar mesmo se a tela for refeita no meio (ex.: girar o celular)
-    suspend fun salvar(gasto: Gasto): Decisao = viewModelScope.async { cadastros.salvar(gasto, hoje()) }.await()
+    suspend fun salvar(gasto: Gasto): Decisao = viewModelScope.async { cadastros.salvar(gasto, hoje(), relogio.instant()) }.await()
     suspend fun excluir(gasto: Gasto): Decisao = viewModelScope.async { cadastros.excluir(gasto, hoje()) }.await()
 }
 

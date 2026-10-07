@@ -15,12 +15,14 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.joaobarcelos.financas.data.datastore.DataStoreConfiguracoesRepository
 import com.joaobarcelos.financas.data.local.FinancasDatabase
+import com.joaobarcelos.financas.data.repository.RoomHistoricoRepository
 import com.joaobarcelos.financas.data.repository.RoomOrcamentoRepository
 import com.joaobarcelos.financas.domain.model.ContaFixa
 import com.joaobarcelos.financas.domain.model.Entrada
 import com.joaobarcelos.financas.domain.model.MetaReserva
 import com.joaobarcelos.financas.domain.model.TipoEntrada
 import com.joaobarcelos.financas.domain.model.TipoMeta
+import com.joaobarcelos.financas.domain.usecase.Alertas
 import com.joaobarcelos.financas.domain.usecase.Cadastros
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,7 +57,9 @@ class CadastrosTelaTest {
     private val configuracoes by lazy {
         DataStoreConfiguracoesRepository(DataStoreConfiguracoesRepository.criarDataStore(escopo) { File(pasta.root, "c.preferences_pb") })
     }
-    private val cadastros by lazy { Cadastros(orcamento, configuracoes) }
+    private val cadastros by lazy {
+        Cadastros(orcamento, configuracoes, Alertas(orcamento, configuracoes, RoomHistoricoRepository(banco.dao())) {})
+    }
 
     // Criados fora da tela, como pede o lint; o by lazy cria só no primeiro uso
     private val vmContas by lazy { ContasViewModel(cadastros, orcamento, configuracoes, relogio) }

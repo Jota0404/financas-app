@@ -1,5 +1,6 @@
 package com.joaobarcelos.financas.domain.usecase
 
+import com.joaobarcelos.financas.domain.Ambiente
 import com.joaobarcelos.financas.domain.CenarioBase
 import com.joaobarcelos.financas.domain.calculadora.Orcamento
 import com.joaobarcelos.financas.domain.calculadora.parcelaEm
@@ -22,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import java.time.Instant
 
 class CadastrosTest {
     private val base = CenarioBase.orcamento.let {
@@ -230,28 +232,11 @@ class CadastrosTest {
         assertEquals(Decisao.Permitido, decidirExclusao(antigo.copy(data = data(1, 10)), outubro))
     }
 
-    // Repositórios em memória, para testar que o bloqueado não chega ao banco
-    private class OrcamentoEmMemoria(inicial: Orcamento) : OrcamentoRepository {
-        val dados = MutableStateFlow(inicial)
-        override fun orcamento() = dados
-        override fun categorias() = flowOf(Categoria.PADRAO)
-        override suspend fun salvar(entrada: Entrada) = 1L.also { dados.value = dados.value.copy(entradas = dados.value.entradas + entrada) }
-        override suspend fun salvar(conta: ContaFixa) = 1L.also { dados.value = dados.value.copy(contas = dados.value.contas.filterNot { it.id == conta.id } + conta) }
-        override suspend fun salvar(meta: MetaReserva) = 1L.also { dados.value = dados.value.copy(metas = dados.value.metas + meta) }
-        override suspend fun salvar(gasto: Gasto) = 1L.also { dados.value = dados.value.copy(gastos = dados.value.gastos + gasto) }
-        override suspend fun excluir(entrada: Entrada) {}
-        override suspend fun excluir(conta: ContaFixa) { dados.value = dados.value.copy(contas = dados.value.contas - conta) }
-        override suspend fun excluir(meta: MetaReserva) {}
-        override suspend fun excluir(gasto: Gasto) {}
-    }
-
-    private class ConfiguracoesFixas : ConfiguracoesRepository {
-        override fun configuracoes() = flowOf(Configuracoes())
-        override suspend fun atualizar(mudanca: (Configuracoes) -> Configuracoes) {}
-    }
-
-    private val repositorio = OrcamentoEmMemoria(base)
-    private val cadastros = Cadastros(repositorio, ConfiguracoesFixas())
+    // Repositórios em memória (Fakes.kt), para testar que o bloqueado não chega ao banco
+    private val ambiente = Ambiente(base)
+    private val repositorio = ambiente.orcamento
+    private val cadastros = ambiente.cadastros
+    private val agora = Instant.parse("2026-10-06T12:00:00Z")
 
     @Test
     fun `meta bloqueada nao e salva e meta que cabe e salva`() = runBlocking {
@@ -283,9 +268,9 @@ class CadastrosTest {
 
     @Test
     fun `gasto bloqueado nao e salvo e gasto valido e salvo`() = runBlocking {
-        assertEquals(bloqueio(ErroCadastro.DATA_FUTURA), cadastros.salvar(Gasto(1_000, data(7, 10)), hoje))
+        assertEquals(bloqueio(ErroCadastro.DATA_FUTURA), cadastros.salvar(Gasto(1_000, data(7, 10)), hoje, agora))
         assertEquals(0, repositorio.orcamento().first().gastos.size)
-        assertEquals(Decisao.Permitido, cadastros.salvar(Gasto(1_000, hoje), hoje))
+        assertEquals(Decisao.Permitido, cadastros.salvar(Gasto(1_000, hoje), hoje, agora))
         assertEquals(1, repositorio.orcamento().first().gastos.size)
     }
 }

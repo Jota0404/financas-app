@@ -31,6 +31,7 @@ interface OrcamentoRepository {
 /** Ciclos fechados e registro de alertas já disparados. */
 interface HistoricoRepository {
     fun ciclosFechados(): Flow<List<CicloFechado>>
+    /** Devolve -1 quando esse ciclo já tinha sido fechado. */
     suspend fun salvar(cicloFechado: CicloFechado): Long
 
     /** Registra o alerta e devolve true, ou devolve false se ele já disparou nesse período. */

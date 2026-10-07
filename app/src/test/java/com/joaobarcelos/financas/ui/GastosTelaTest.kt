@@ -25,6 +25,7 @@ import com.joaobarcelos.financas.domain.model.Gasto
 import com.joaobarcelos.financas.domain.model.MetaReserva
 import com.joaobarcelos.financas.domain.model.TipoEntrada
 import com.joaobarcelos.financas.domain.model.TipoMeta
+import com.joaobarcelos.financas.domain.usecase.Alertas
 import com.joaobarcelos.financas.domain.usecase.Cadastros
 import com.joaobarcelos.financas.ui.gastos.GastoViewModel
 import com.joaobarcelos.financas.ui.historico.HistoricoTela
@@ -65,7 +66,9 @@ class GastosTelaTest {
     private val configuracoes by lazy {
         DataStoreConfiguracoesRepository(DataStoreConfiguracoesRepository.criarDataStore(escopo) { File(pasta.root, "c.preferences_pb") })
     }
-    private val cadastros by lazy { Cadastros(orcamento, configuracoes) }
+    private val cadastros by lazy {
+        Cadastros(orcamento, configuracoes, Alertas(orcamento, configuracoes, RoomHistoricoRepository(banco.dao())) {})
+    }
     private val vmInicio by lazy { InicioViewModel(orcamento, configuracoes, relogio) }
     private val vmGasto by lazy { GastoViewModel(cadastros, orcamento, relogio) }
     private val vmHistorico by lazy { HistoricoViewModel(orcamento, configuracoes, RoomHistoricoRepository(banco.dao()), relogio) }
