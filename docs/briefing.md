@@ -1,6 +1,6 @@
 # Briefing — Fôlego, app de finanças pessoais (Android)
 
-Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17) e sobre as dúvidas de tela do início da Etapa 4 (cadastro de parcelas, data das entradas quando excluir uma conta fixa e o aviso da RN08 sem metas) e sobre a revisão de QA da Etapa 4 (`docs/qa/2026-10-06-etapa-4.md`, P18) e sobre as dúvidas de tela do início da Etapa 5 (editar gastos, barra com limite zero, aviso de reserva invadida, cores da barra e o que conta como toque no CA12) e sobre os alertas e o fechamento de ciclo do início da Etapa 6.
+Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17) e sobre as dúvidas de tela do início da Etapa 4 (cadastro de parcelas, data das entradas quando excluir uma conta fixa e o aviso da RN08 sem metas) e sobre a revisão de QA da Etapa 4 (`docs/qa/2026-10-06-etapa-4.md`, P18) e sobre as dúvidas de tela do início da Etapa 5 (editar gastos, barra com limite zero, aviso de reserva invadida, cores da barra e o que conta como toque no CA12) e sobre os alertas e o fechamento de ciclo do início da Etapa 6 e sobre a revisão de QA da Etapa 6 (`docs/qa/2026-10-07-etapa-6.md`, P19).
 
 ## Visão geral
 
@@ -129,3 +129,144 @@ Decisões do dono sobre os alertas (início da Etapa 6):
 - Um gasto que pula do A2 direto para o A3 dispara só o A3, e o A2 conta como enviado naquele período.
 - Com limite da semana em R$ 0,00, o A2 e o A3 não disparam; a tela Início e o A4 já avisam.
 - Corrigir um gasto que passa a invadir a reserva também dispara o A4, uma vez por gasto.
+- O A1 de uma semana chega na primeira rotina daquela semana: em geral na segunda, mas, se o app for instalado ou voltar a rodar no meio da semana, chega nesse dia.
+- O A4 dispara quando a reserva do ciclo fica mais invadida depois de um gasto, novo ou corrigido.
+- Um ciclo fechado com atraso (app parado na virada) é retratado com os cadastros do momento do fechamento.
+
+## Modelo de dados
+
+Sete tabelas no Room e um arquivo de configurações no DataStore. Valores em centavos (Long), percentuais em pontos-base (Int, 1000 = 10%), datas como LocalDate.
+
+| Entidade | Campos | Observações |
+| --- | --- | --- |
+| Entrada | id, descricao, valorCentavos, tipo (RECORRENTE / AVULSA), dataInicio, dataFim? | Recorrente entra nos ciclos cujo primeiro dia cai entre dataInicio e dataFim, inclusive (a favor da segurança: um salário novo só conta a partir do primeiro pagamento); no cadastro, a dataInicio da recorrente vem preenchida com o início do ciclo atual. Avulsa só no ciclo da sua data, que fica entre o início do ciclo atual e hoje, como nos gastos (RN14) |
+| ContaFixa | id, descricao, valorCentavos, diaVencimento, cicloInicio, duracaoMeses?, encerradaEm? | duracaoMeses nulo = sem fim (RN04). No cadastro, uma conta com duração informa a parcela do ciclo atual (ex.: parcela 3 de 10), e o cicloInicio fica (parcela − 1) ciclos antes do atual; conta sem fim começa no ciclo atual |
+| Gasto | id, descricao, valorCentavos, data, categoriaId, criadoEm | categoriaId é chave estrangeira |
+| Categoria | id, nome, icone | Vem com categorias padrão (Alimentação, Transporte, Lazer, Saúde, Outros) |
+| MetaReserva | id, nome, tipo (VALOR / PERCENTUAL), valor, ativa | valor em centavos ou pontos-base, conforme o tipo |
+| CicloFechado | id, inicio, fim, totalEntradas, totalFixas, totalReserva, totalGastos, reservaInvadidaCentavos | Retrato do ciclo no fechamento; garante a RN05 |
+| RegistroAlerta | id, codigo, periodoRef, disparadoEm | Impede alerta duplicado no mesmo período |
+
+**Configurações (DataStore):** diaPagamento, inicioCicloAtual?, fimCicloAtual?, limiteSemanalManual?, percentualAtencao, percentualCritico, horaResumo. `inicioCicloAtual` e `fimCicloAtual` guardam o ciclo atual quando uma mudança do dia do pagamento (RN01) o deixa diferente do normal; depois do `fimCicloAtual`, o ciclo volta a sair só do `diaPagamento`. Só o início não basta: mudar de 1 para 15 em 10/10 ou em 20/10 dá ciclos que começam em 01/10 e terminam em 14/10 ou em 14/11.
+
+Campos com **?** são opcionais (nuláveis).
+
+## Arquitetura
+
+MVVM em camadas, com as regras de negócio isoladas num domínio em Kotlin puro. Assim o QA testa os cálculos sem abrir tela nem banco, e trocar o Room por nuvem no futuro não mexe nas regras.
+
+```text
+Telas (Compose) -> ViewModels -> Domínio (casos de uso + calculadoras, RN01-RN15) -> Repositórios -> Room / DataStore
+WorkManager -> Domínio (calcula) ; WorkManager -> Notificações (A1-A5)
+```
+
+Cada seta só aponta para baixo: tela nunca acessa banco direto, e o domínio não conhece nada do Android.
+
+O domínio fica num módulo Gradle separado, **`:domain`**, em Kotlin puro (JVM, sem plugin Android). O módulo `:app` depende do `:domain`, nunca o contrário. Como o `:domain` não enxerga as bibliotecas do Android, o próprio compilador recusa um `import android.*` ali. O WorkManager usa o mesmo domínio que as telas, então o alerta e a tela inicial nunca mostram números diferentes.
+
+```text
+app/src/main/java/.../financas/       módulo :app (Android)
+├── ui/          telas e ViewModels, uma pasta por funcionalidade
+├── data/        entidades Room, DAOs, DataStore e repositórios
+├── worker/      agendamento e disparo dos alertas
+└── di/          módulos do Hilt
+
+domain/src/main/kotlin/.../financas/domain/   módulo :domain (Kotlin puro)
+├── model/       modelos do domínio
+├── usecase/     casos de uso
+└── calculadora/ cálculos de ciclo, reserva, disponível e limite semanal
+```
+
+Os testes do domínio ficam em `domain/src/test/kotlin/.../financas/domain/`.
+
+## Telas e fluxos
+
+Oito telas, com navegação inferior em quatro abas: Início, Histórico, Cadastros e Configurações. O fluxo mais usado, registrar um gasto, precisa caber em até 3 toques a partir da tela inicial.
+
+1. **Primeiro uso (onboarding)** — assistente em passos: dia do pagamento, salário, contas fixas, metas de reserva e pedido de permissão de notificação. Só aparece uma vez.
+2. **Início** — em destaque, o disponível da semana. Abaixo, uma barra de consumo (verde até 70%, amarela até 90%, vermelha acima; os dois pontos seguem os percentuais de atenção e crítico dos alertas A2 e A3, que são configuráveis), o disponível do ciclo e o valor protegido na reserva. Botão flutuante "+" para novo gasto. Quando o limite da semana é R$ 0,00, a barra aparece cheia e vermelha, com o texto "Sem limite nesta semana: o disponível do ciclo acabou".
+3. **Novo gasto** — valor, descrição, categoria e data (padrão: hoje). O teclado numérico abre direto no campo valor. Um gasto que invade a reserva é salvo (RN09), e o app avisa na hora quanto a reserva do ciclo está invadida; a notificação A4 vem além disso.
+4. **Contas fixas** — lista com valor, vencimento e progresso ("parcela 3 de 10" ou "sem fim").
+5. **Entradas** — recorrentes e avulsas, separadas. A lista mostra as recorrentes e as avulsas do ciclo atual. Avulsas de ciclos fechados aparecem só no Histórico e não podem ser editadas nem excluídas.
+6. **Metas de reserva** — lista de metas com o valor efetivo no ciclo atual.
+7. **Histórico** — gastos do ciclo atual agrupados por dia e, abaixo, os ciclos fechados com seus totais e a marca de reserva invadida. As entradas avulsas de ciclos fechados aparecem aqui, só para consulta. Tocar num gasto do ciclo atual abre o mesmo formulário do novo gasto, para corrigir ou excluir; a RN14 e a RN15 valem também na edição. Gastos de ciclos fechados não podem ser mudados.
+8. **Configurações** — dia do pagamento, limite manual, percentuais e horário dos alertas.
+
+As telas 4, 5 e 6 ficam dentro da aba Cadastros. Toda tela de lista tem estado vazio com orientação ("Nenhuma conta fixa ainda. Toque em + para adicionar").
+
+## Roteiro de construção
+
+Sete etapas, e cada uma termina numa entrega ao QA. A regra de ouro: **os cálculos são construídos e testados antes de qualquer tela**, porque um bug no cálculo contamina tudo o que vem depois.
+
+1. **Setup** — projeto Android com Compose, Hilt e estrutura de pastas da arquitetura; repositório no GitHub com README inicial; módulo :domain separado; testes rodando no GitHub Actions a cada push.
+   - Entrega ao QA: projeto compila e abre uma tela vazia.
+2. **Domínio (só Kotlin puro)** — classes que calculam ciclo, contas ativas, reserva, disponível e limite semanal (RN01 a RN15), sem banco e sem tela.
+   - Entrega ao QA: testes unitários passando para cada RN, incluindo os casos de borda.
+3. **Persistência** — entidades do Room, DAOs, repositórios e DataStore.
+   - Entrega ao QA: testes de DAO e repositório.
+4. **Cadastros** — telas de contas fixas, entradas e metas de reserva, com seus ViewModels.
+5. **Gastos e Início** — tela inicial, novo gasto e histórico.
+6. **Alertas e fechamento de ciclo** — WorkManager, notificações A1 a A5, RegistroAlerta e geração do CicloFechado.
+7. **Onboarding, configurações e acabamento** — primeiro uso, estados vazios, ícone e README final com prints e APK de release.
+
+Não avance de etapa com bug crítico aberto pelo QA na etapa anterior.
+
+## Critérios de aceite
+
+Os casos usam o mesmo cenário base, salvo quando a situação diz outra coisa. Os CA de cálculo viram testes unitários na etapa 2 ou 6; o CA12 vira teste de interface na etapa 5. A RN16 é coberta por um teste instrumentado (backup ligado) e por uma checagem manual de backup e restauração na etapa 3.
+
+**Cenário base:** salário recorrente de R$ 3.000,00; dia do pagamento 1; aluguel R$ 1.000,00 sem fim; celular R$ 200,00 por 3 meses a partir do ciclo de outubro/2026; reserva de 10% das entradas.
+
+| Código | Regra | Situação | Resultado esperado |
+| --- | --- | --- | --- |
+| CA01 | RN03, RN07 | Ciclo de outubro, sem gastos | Disponível = R$ 1.500,00 |
+| CA02 | RN03 | Ciclo de janeiro/2027, sem gastos | Celular encerrado; disponível = R$ 1.700,00 |
+| CA03 | RN09 | Gasto de R$ 1.600,00 em outubro | Gasto salvo; disponível = −R$ 100,00; reserva invadida em R$ 100,00; alerta A4 |
+| CA04 | RN08 | Criar meta de R$ 2.000,00 (valor fixo) em outubro | Salvamento bloqueado; mensagem informa que faltam R$ 500,00 |
+| CA05 | RN11 | Segunda, 05/10/2026, sem gastos (27 dias restantes no ciclo) | Limite semanal = R$ 388,88 (R$ 1.500,00 × 7 ÷ 27) |
+| CA06 | RN13 | Disponível de R$ 1.000,00 numa segunda com 21 dias restantes no ciclo | Limite = R$ 333,33 (nunca 333,34) |
+| CA07 | RN02 | Dia do pagamento 31, ciclo de abril | Ciclo começa em 30/04 |
+| CA08 | A2 | Na semana do CA05, os gastos chegam a R$ 272,22 (primeiro valor que atinge 70% de R$ 388,88) e depois a R$ 300,00 | A2 dispara uma única vez |
+| CA09 | RN15 | Gasto de R$ 0,00 | Salvamento bloqueado |
+| CA10 | RN14 | Gasto com data em ciclo já fechado | Salvamento bloqueado |
+| CA11 | RN05 | Aluguel editado para R$ 1.100,00 em novembro | CicloFechado de outubro continua com R$ 1.000,00 de aluguel |
+| CA12 | Telas | Registrar gasto a partir do Início | No máximo 3 toques (categoria padrão: Outros); digitar o valor não conta como toque |
+| CA13 | RN11 | Quinta, 01/10/2026 (primeiro dia do ciclo), sem gastos | Limite de 01 a 04/10 = R$ 193,54 (R$ 1.500,00 × 4 ÷ 31) |
+| CA14 | RN11 | Segunda, 05/10/2026, com o gasto do CA03 feito entre 01 e 04/10 (disponível −R$ 100,00) | Limite semanal = R$ 0,00 |
+| CA15 | RN13 | Salário de R$ 3.000,05 com a meta de 10% | Reserva = R$ 300,01 (arredonda para cima) |
+| CA16 | RN12 | Limite manual de R$ 500,00; quinta, 01/10/2026 (primeiro dia do ciclo), sem gastos | Limite de 01 a 04/10 = R$ 285,71 (R$ 500,00 × 4 ÷ 7); app avisa que o ritmo não fecha o ciclo, porque o automático é R$ 193,54 (CA13) |
+
+Critérios gerais: o app não fecha sozinho em nenhum fluxo, funciona sem internet, e os dados sobrevivem a fechar o app e reiniciar o celular.
+
+## Protocolo de entrega ao QA
+
+Toda entrega ao agente de QA segue o mesmo pacote, e todo retorno do QA cita a regra (RN) ou o critério (CA) violado.
+
+**O que você envia**
+
+- O número da etapa do roteiro.
+- O código: link do repositório e branch, ou os arquivos alterados.
+- A saída dos testes (passou ou falhou, e quais).
+- Um resumo do que mudou e qualquer dúvida ou desvio do briefing.
+
+**O que o QA devolve**
+
+| Severidade | Significado | Ação |
+| --- | --- | --- |
+| Crítico | Cálculo errado, perda de dados ou app fechando | Bloqueia a próxima etapa |
+| Alto | Regra de negócio descumprida | Corrigir antes de avançar |
+| Médio | Caso de borda sem tratamento ou teste faltando | Corrigir na etapa atual ou na seguinte |
+| Baixo | Legibilidade, nomenclatura, boas práticas | Melhoria opcional |
+
+**Modelo de mensagem para o QA**
+
+```markdown
+Etapa: [número e nome]
+Briefing: [link deste documento]
+Código: [link do repo/branch ou arquivos]
+Testes: [resultado]
+O que mudou: [resumo]
+Dúvidas/desvios: [se houver]
+
+Revise contra as RN e CA do briefing. Classifique cada problema por severidade e cite a regra afetada.
+```
