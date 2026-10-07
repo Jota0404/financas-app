@@ -71,6 +71,32 @@ class CadastrosTest {
     }
 
     @Test
+    fun `RN04 editar conta antiga para duracao menor que a parcela atual e bloqueado`() {
+        // QA M1: na parcela 3 de 10, encurtar para 1 ou 2 meses tiraria a conta de outubro, como excluir
+        val antiga = conta.copy(id = 7, cicloInicio = inicioPelaParcela(outubro, 3))
+        val comAntiga = base.copy(contas = base.contas + antiga)
+        assertEquals(bloqueio(ErroCadastro.CONTA_SAIRIA_DO_CICLO), decidirConta(antiga.copy(duracaoMeses = 1), comAntiga, outubro))
+        assertEquals(bloqueio(ErroCadastro.CONTA_SAIRIA_DO_CICLO), decidirConta(antiga.copy(duracaoMeses = 2), comAntiga, outubro))
+        // encurtar até a parcela atual (3) mantém a conta em outubro e é permitido
+        assertEquals(Decisao.Permitido, decidirConta(antiga.copy(duracaoMeses = 3), comAntiga, outubro))
+    }
+
+    @Test
+    fun `RN04 editar conta que ja terminou continua permitido`() {
+        // a conta de 2 meses que começou em agosto não vale mais em outubro; renomear não muda isso
+        val terminada = conta.copy(id = 8, duracaoMeses = 2, cicloInicio = data(1, 8))
+        val comTerminada = base.copy(contas = base.contas + terminada)
+        assertEquals(Decisao.Permitido, decidirConta(terminada.copy(descricao = "Curso"), comTerminada, outubro))
+    }
+
+    @Test
+    fun `P18 avulsa de ciclo fechado nao pode ser excluida`() {
+        assertEquals(bloqueio(ErroCadastro.DATA_EM_CICLO_FECHADO), decidirExclusao(freela.copy(dataInicio = data(30, 9)), outubro))
+        assertEquals(Decisao.Permitido, decidirExclusao(freela, outubro))
+        assertEquals(Decisao.Permitido, decidirExclusao(base.entradas[0].copy(dataInicio = data(1, 1, 2020)), outubro))
+    }
+
+    @Test
     fun `RN03 conta na parcela 3 de 10 comeca 2 ciclos antes`() {
         // decisão do dono: financiamento já na 3ª parcela em outubro começou no ciclo de agosto
         val naTerceira = conta.copy(cicloInicio = inicioPelaParcela(outubro, 3))

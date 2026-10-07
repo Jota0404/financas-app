@@ -15,9 +15,12 @@ fun formatarReais(centavos: Long): String {
 
 private val formatoReais = Regex("""\d{1,3}(\.\d{3}){0,4}(,\d{1,2})?|\d{1,13}(,\d{1,2})?""")
 
-/** Lê "1.500,00", "1500", "1500,5" ou "R$ 0,01" em centavos; null quando o texto não é um valor. */
+/** Ponto seguido de 1 ou 2 dígitos no fim é centavo ("1500.50"); com 3 dígitos é milhar ("1.500"). */
+private val centavosComPonto = Regex("""\d{1,13}\.\d{1,2}""")
+
+/** Lê "1.500,00", "1500", "1500,5", "1500.50" ou "R$ 0,01" em centavos; null quando o texto não é um valor. */
 fun lerCentavos(texto: String): Long? {
-    val limpo = texto.replace("R$", "").trim()
+    val limpo = texto.replace("R$", "").trim().let { if (centavosComPonto.matches(it)) it.replace('.', ',') else it }
     if (!formatoReais.matches(limpo)) return null
     val partes = limpo.replace(".", "").split(",")
     return partes[0].toLong() * 100 + partes.getOrElse(1) { "" }.padEnd(2, '0').toLong()
@@ -30,9 +33,9 @@ fun formatarPercentual(pontosBase: Long): String {
     return if (fracao.isEmpty()) "$inteiro%" else "$inteiro,$fracao%"
 }
 
-/** Lê "10", "10,5" ou "10,25%" em pontos-base; null quando o texto não é um percentual. */
+/** Lê "10", "10,5", "10.5" ou "10,25%" em pontos-base; null quando o texto não é um percentual. */
 fun lerPontosBase(texto: String): Long? {
-    val limpo = texto.replace("%", "").trim()
+    val limpo = texto.replace("%", "").trim().replace('.', ',')
     if (!Regex("""\d{1,3}(,\d{1,2})?""").matches(limpo)) return null
     val partes = limpo.split(",")
     return partes[0].toLong() * 100 + partes.getOrElse(1) { "" }.padEnd(2, '0').toLong()

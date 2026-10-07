@@ -1,6 +1,7 @@
 package com.joaobarcelos.financas.domain.usecase
 
 import com.joaobarcelos.financas.domain.calculadora.Orcamento
+import com.joaobarcelos.financas.domain.calculadora.ativaEm
 import com.joaobarcelos.financas.domain.calculadora.cicloAtual
 import com.joaobarcelos.financas.domain.model.Ciclo
 import com.joaobarcelos.financas.domain.model.ContaFixa
@@ -25,6 +26,7 @@ enum class ErroCadastro {
     FIM_ANTES_DO_INICIO,
     METAS_NAO_CABEM,
     CONTA_JA_DESCONTADA,
+    CONTA_SAIRIA_DO_CICLO,
 }
 
 /** O que fazer com um cadastro. A tela só aplica a decisão. */
@@ -60,6 +62,9 @@ fun decidirConta(conta: ContaFixa, orcamento: Orcamento, cicloAtual: Ciclo): Dec
         !valorValido(conta.valorCentavos) -> ErroCadastro.VALOR_ZERO_OU_NEGATIVO
         conta.diaVencimento !in 1..31 -> ErroCadastro.DIA_VENCIMENTO_INVALIDO
         duracao != null && duracao < 1 -> ErroCadastro.DURACAO_INVALIDA
+        // RN04 e P17 também ao editar: diminuir a duração não pode tirar a conta do ciclo atual
+        orcamento.contas.any { it.id == conta.id && it.id != 0L && it.ativaEm(cicloAtual) } &&
+            !conta.ativaEm(cicloAtual) -> ErroCadastro.CONTA_SAIRIA_DO_CICLO
         // conta nova: a parcela do ciclo atual vai de 1 até a duração
         conta.id == 0L && duracao != null &&
             conta.cicloInicio !in inicioPelaParcela(cicloAtual, duracao)..cicloAtual.inicio -> ErroCadastro.PARCELA_INVALIDA
@@ -103,6 +108,14 @@ fun decidirMeta(meta: MetaReserva, orcamento: Orcamento, cicloAtual: Ciclo): Dec
 fun decidirExclusao(conta: ContaFixa, cicloAtual: Ciclo): Decisao =
     if (conta.cicloInicio >= cicloAtual.inicio) Decisao.Permitido else Decisao.Bloqueado(ErroCadastro.CONTA_JA_DESCONTADA)
 
+/** P18: uma avulsa de ciclo fechado é só para consulta e não pode ser excluída. */
+fun decidirExclusao(entrada: Entrada, cicloAtual: Ciclo): Decisao =
+    if (entrada.tipo == TipoEntrada.AVULSA && entrada.dataInicio < cicloAtual.inicio) {
+        Decisao.Bloqueado(ErroCadastro.DATA_EM_CICLO_FECHADO)
+    } else {
+        Decisao.Permitido
+    }
+
 /**
  * Salva e exclui cadastros aplicando as decisões acima: o que é bloqueado não chega ao banco.
  * [hoje] vem de quem chama, porque o domínio não lê o relógio.
@@ -131,6 +144,7 @@ class Cadastros(
         if (conta.encerradaEm == null) orcamento.salvar(conta.copy(encerradaEm = hoje))
     }
 
-    suspend fun excluir(entrada: Entrada) = orcamento.excluir(entrada)
+    suspend fun excluir(entrada: Entrada, hoje: LocalDate): Decisao =
+        decidirExclusao(entrada, ciclo(hoje)).also { if (it is Decisao.Permitido) orcamento.excluir(entrada) }
     suspend fun excluir(meta: MetaReserva) = orcamento.excluir(meta)
 }

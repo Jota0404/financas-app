@@ -27,8 +27,18 @@ class FormatosTest {
     }
 
     @Test
+    fun `ponto com 1 ou 2 digitos no fim e centavo e com 3 digitos e milhar`() {
+        // QA M2: teclados que só têm ponto
+        assertEquals(150_050L, lerCentavos("1500.50"))
+        assertEquals(1_250L, lerCentavos("12.5"))
+        assertEquals(150L, lerCentavos("1.50"))
+        assertEquals(150_000L, lerCentavos("1.500"))
+        assertEquals(1050L, lerPontosBase("10.5"))
+    }
+
+    @Test
     fun `texto que nao e valor nao vira dinheiro`() {
-        listOf("", "abc", "1,505", "1.50", "-10", "99999999999999999999", "1,2,3", "12a").forEach {
+        listOf("", "abc", "1,505", "1.5000", "1.500.5", "-10", "99999999999999999999", "1,2,3", "12a", "1,500.50").forEach {
             assertNull(it, lerCentavos(it))
         }
     }
