@@ -2,8 +2,8 @@
 
 Atualizado em 07/10/2026.
 
-**Etapa atual:** 6 de 7 (Alertas e fechamento de ciclo) concluída e entregue ao QA. Aguarda a
-revisão do QA e a aprovação do dono antes da Etapa 7.
+**Etapa atual:** 7 de 7 (Onboarding, configurações e acabamento), em andamento. A Etapa 6 foi
+aprovada pelo dono em 07/10/2026.
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -16,8 +16,8 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | 3. Persistência (Room, DAOs, DataStore) | ✅ Concluída e aprovada em 06/10/2026 |
 | 4. Cadastros | ✅ Concluída e aprovada em 06/10/2026 |
 | 5. Gastos e Início | ✅ Concluída e aprovada em 06/10/2026 |
-| 6. Alertas e fechamento de ciclo | 🔍 Concluída em 07/10/2026, aguardando QA e aprovação |
-| 7. Onboarding, configurações e acabamento | ⏳ Não iniciada |
+| 6. Alertas e fechamento de ciclo | ✅ Concluída e aprovada em 07/10/2026 |
+| 7. Onboarding, configurações e acabamento | 🔨 Em andamento |
 
 ## O que já existe (Etapa 1)
 
@@ -252,6 +252,16 @@ forçar a rotina diária, a notificação "Resumo da semana", que não se repeti
   Etapa 7).
 - O GitHub avisou que o runner `ubuntu-latest` passa para o Ubuntu 26 a partir de 19/10/2026.
   Não exige ação agora: vale conferir se os testes continuam passando depois dessa data.
+
+- Revisão do QA da Etapa 6 ([`qa/2026-10-07-etapa-6.md`](qa/2026-10-07-etapa-6.md)): reprovada só pelo
+  C1 (uma edição do desenvolvedor no `f70d14d` apagou metade do briefing). **C1 resolvido:** o briefing
+  foi restaurado (`12e8baa`), com as 10 seções e os critérios CA01 a CA16; comparado com a versão
+  anterior ao corte (`a0ea684`), só mudaram a linha da versão, as decisões dos alertas e a P19. Com
+  isso, a Etapa 6 ficou aprovada com ressalvas e foi aprovada pelo dono em 07/10/2026. Decisão do dono
+  sobre a P19, registrada no briefing (seção Alertas): o A1 chega na primeira rotina da semana; o A4
+  dispara quando a reserva fica mais invadida; um ciclo fechado com atraso usa os cadastros do
+  momento do fechamento. Ficam para o começo da Etapa 7: M1 (proteger o fechamento ao abrir o app) e
+  B3 (conferir A2 e A3 também na rotina diária). O B1 é do script de cobertura, que é do QA.
 
 ## Próximo passo
 
