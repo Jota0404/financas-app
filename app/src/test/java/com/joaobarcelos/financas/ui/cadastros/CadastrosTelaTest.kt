@@ -56,6 +56,11 @@ class CadastrosTelaTest {
     }
     private val cadastros by lazy { Cadastros(orcamento, configuracoes) }
 
+    // Criados fora da tela, como pede o lint; o by lazy cria só no primeiro uso
+    private val vmContas by lazy { ContasViewModel(cadastros, orcamento, configuracoes, relogio) }
+    private val vmEntradas by lazy { EntradasViewModel(cadastros, orcamento, configuracoes, relogio) }
+    private val vmMetas by lazy { MetasViewModel(cadastros, orcamento, configuracoes, relogio) }
+
     @After
     fun fechar() {
         escopo.cancel()
@@ -79,15 +84,15 @@ class CadastrosTelaTest {
 
     @Test
     fun `listas vazias orientam a tocar em mais`() {
-        tela.setContent { ContasTela(ContasViewModel(cadastros, orcamento, configuracoes, relogio)) }
+        tela.setContent { ContasTela(vmContas) }
         esperar("Nenhuma conta fixa ainda. Toque em + para adicionar.")
     }
 
     @Test
     fun `entradas e metas vazias tambem orientam`() {
         tela.setContent {
-            EntradasTela(EntradasViewModel(cadastros, orcamento, configuracoes, relogio))
-            MetasTela(MetasViewModel(cadastros, orcamento, configuracoes, relogio))
+            EntradasTela(vmEntradas)
+            MetasTela(vmMetas)
         }
         esperar("Nenhuma entrada ainda.")
         esperar("Nenhuma meta de reserva ainda.")
@@ -95,7 +100,7 @@ class CadastrosTelaTest {
 
     @Test
     fun `cadastrar financiamento na parcela 3 de 10 pelo formulario`() {
-        tela.setContent { ContasTela(ContasViewModel(cadastros, orcamento, configuracoes, relogio)) }
+        tela.setContent { ContasTela(vmContas) }
         esperar("Nenhuma conta fixa ainda.")
         tela.onNodeWithContentDescription("Adicionar").performClick()
         campo("Nome (ex.: Aluguel)").performTextInput("Financiamento")
@@ -112,7 +117,7 @@ class CadastrosTelaTest {
     @Test
     fun `CA04 meta de 2000 reais e bloqueada na tela porque faltam 500 reais`() {
         salvarCenarioBase()
-        tela.setContent { MetasTela(MetasViewModel(cadastros, orcamento, configuracoes, relogio)) }
+        tela.setContent { MetasTela(vmMetas) }
         esperar("R$ 300,00 neste ciclo")
         tela.onNodeWithContentDescription("Adicionar").performClick()
         campo("Nome (ex.: Reserva de segurança)").performTextInput("Viagem")
@@ -126,7 +131,7 @@ class CadastrosTelaTest {
     @Test
     fun `RN08 conta que deixa as metas sem caber e salva com aviso`() {
         salvarCenarioBase()
-        tela.setContent { ContasTela(ContasViewModel(cadastros, orcamento, configuracoes, relogio)) }
+        tela.setContent { ContasTela(vmContas) }
         esperar("Aluguel")
         tela.onNodeWithContentDescription("Adicionar").performClick()
         campo("Nome (ex.: Aluguel)").performTextInput("Escola")
@@ -141,7 +146,7 @@ class CadastrosTelaTest {
     @Test
     fun `RN04 conta ja descontada oferece encerrar e nao excluir`() {
         runBlocking { orcamento.salvar(ContaFixa(100_000, LocalDate.of(2026, 9, 1), descricao = "Aluguel antigo", diaVencimento = 5)) }
-        tela.setContent { ContasTela(ContasViewModel(cadastros, orcamento, configuracoes, relogio)) }
+        tela.setContent { ContasTela(vmContas) }
         esperar("Aluguel antigo").performClick()
         esperar("Encerrar conta")
         tela.onNodeWithText("Excluir conta").assertDoesNotExist()
@@ -153,7 +158,7 @@ class CadastrosTelaTest {
     @Test
     fun `RN04 conta que comeca neste ciclo pode ser excluida`() {
         runBlocking { orcamento.salvar(ContaFixa(5_000, LocalDate.of(2026, 10, 1), descricao = "Engano", diaVencimento = 5)) }
-        tela.setContent { ContasTela(ContasViewModel(cadastros, orcamento, configuracoes, relogio)) }
+        tela.setContent { ContasTela(vmContas) }
         esperar("Engano").performClick()
         esperar("Excluir conta").performScrollTo().performClick()
         tela.onNodeWithText("Excluir").performClick()
@@ -162,7 +167,7 @@ class CadastrosTelaTest {
 
     @Test
     fun `RN15 entrada de valor zero e bloqueada na tela`() {
-        tela.setContent { EntradasTela(EntradasViewModel(cadastros, orcamento, configuracoes, relogio)) }
+        tela.setContent { EntradasTela(vmEntradas) }
         esperar("Nenhuma entrada ainda.")
         tela.onNodeWithContentDescription("Adicionar").performClick()
         campo("Nome (ex.: Salário)").performTextInput("Salário")
@@ -174,7 +179,7 @@ class CadastrosTelaTest {
 
     @Test
     fun `salario novo vem com o inicio do ciclo e aparece em recorrentes`() {
-        tela.setContent { EntradasTela(EntradasViewModel(cadastros, orcamento, configuracoes, relogio)) }
+        tela.setContent { EntradasTela(vmEntradas) }
         esperar("Nenhuma entrada ainda.")
         tela.onNodeWithContentDescription("Adicionar").performClick()
         esperar("Entra a partir de: 01/10/2026")
