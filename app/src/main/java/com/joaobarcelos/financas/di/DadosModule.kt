@@ -12,6 +12,7 @@ import com.joaobarcelos.financas.data.repository.RoomOrcamentoRepository
 import com.joaobarcelos.financas.domain.repository.ConfiguracoesRepository
 import com.joaobarcelos.financas.domain.repository.HistoricoRepository
 import com.joaobarcelos.financas.domain.repository.OrcamentoRepository
+import com.joaobarcelos.financas.domain.usecase.Cadastros
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -47,5 +48,9 @@ abstract class DadosModule {
 
         @Provides
         fun relogio(): Clock = Clock.systemDefaultZone()
+
+        @Provides
+        fun cadastros(orcamento: OrcamentoRepository, configuracoes: ConfiguracoesRepository) =
+            Cadastros(orcamento, configuracoes)
     }
 }
