@@ -17,6 +17,8 @@ Pacote base: `com.joaobarcelos.financas`.
   briefing. Não deixar a escolha só como "dúvida" na mensagem de entrega.
 - **Nunca mudar uma regra de negócio** sem avisar o dono e sem atualizar o `docs/briefing.md`
   na mesma entrega.
+- Depois de editar o briefing, conferir com `git diff --stat docs/briefing.md` que só as linhas
+  pretendidas mudaram, antes do commit (na Etapa 6, uma edição apagou metade dele).
 - Antes de começar uma etapa, ler o relatório mais recente do QA em `docs/qa/`.
 
 ## Forma de trabalhar
