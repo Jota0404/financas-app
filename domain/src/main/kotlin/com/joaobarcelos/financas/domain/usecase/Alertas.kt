@@ -164,7 +164,8 @@ class Alertas(
 
     /**
      * Rotina de todo dia, por volta do horário do resumo: fecha os ciclos que terminaram, manda o A5
-     * do ciclo fechado mais recente (um só, mesmo atrasado) e o A1 da semana, se ainda não foi.
+     * do ciclo fechado mais recente (um só, mesmo atrasado), o A1 da semana, se ainda não foi, e o A2
+     * ou o A3, se um cadastro novo baixou o limite e os gastos já passaram do ponto (QA Etapa 6, B3).
      */
     suspend fun rotinaDiaria(hoje: LocalDate, agora: Instant) {
         fecharCiclos(hoje)
@@ -172,7 +173,11 @@ class Alertas(
         val config = configuracoes.configuracoes().first()
         val painel = orcamento.orcamento().first().painel(config.cicloAtual(hoje), hoje, config)
         val segunda = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-        disparar(listOfNotNull(maisRecente?.let { Alerta.ResumoDoCiclo(it) }, Alerta.ResumoSemanal(segunda, painel)), agora)
+        disparar(
+            listOfNotNull(maisRecente?.let { Alerta.ResumoDoCiclo(it) }, Alerta.ResumoSemanal(segunda, painel)) +
+                alertasDeLimite(painel, config.percentualAtencao, config.percentualCritico),
+            agora,
+        )
     }
 
     private suspend fun disparar(alertas: List<Alerta>, agora: Instant) {

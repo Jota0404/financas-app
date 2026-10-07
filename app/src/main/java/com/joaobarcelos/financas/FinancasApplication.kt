@@ -7,14 +7,13 @@ import com.joaobarcelos.financas.domain.repository.ConfiguracoesRepository
 import com.joaobarcelos.financas.domain.usecase.Alertas
 import com.joaobarcelos.financas.worker.NotificacoesAndroid
 import com.joaobarcelos.financas.worker.agendarRotinaDiaria
+import com.joaobarcelos.financas.worker.aoAbrirApp
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Clock
-import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -31,9 +30,7 @@ class FinancasApplication : Application(), Configuration.Provider {
         super.onCreate()
         NotificacoesAndroid.criarCanal(this)
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-            // Ao abrir o app, fecha os ciclos que terminaram (RN05) e garante a rotina diária agendada
-            alertas.fecharCiclos(LocalDate.now(relogio))
-            agendarRotinaDiaria(this@FinancasApplication, configuracoes.configuracoes().first().horaResumo, relogio)
+            aoAbrirApp(alertas, configuracoes, relogio) { agendarRotinaDiaria(this@FinancasApplication, it, relogio) }
         }
     }
 }

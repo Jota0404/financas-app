@@ -4,6 +4,7 @@ import com.joaobarcelos.financas.domain.Ambiente
 import com.joaobarcelos.financas.domain.CenarioBase
 import com.joaobarcelos.financas.domain.data
 import com.joaobarcelos.financas.domain.model.Ciclo
+import com.joaobarcelos.financas.domain.model.ContaFixa
 import com.joaobarcelos.financas.domain.model.Gasto
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -109,6 +110,20 @@ class AlertasTest {
         )
         ambiente.alertas.rotinaDiaria(data(12, 10), agora)
         assertEquals(2, ambiente.notificador.avisos.count { it.codigo == CodigoAlerta.A1 })
+    }
+
+    @Test
+    fun `rotina diaria manda o A2 quando uma conta nova baixa o limite da semana`() = runBlocking {
+        // QA Etapa 6, B3: 200 gastos na semana (51% de 388,88); conta nova de 400 em 05/10 baixa o
+        // limite para (1500 - 400) x 7 / 27 = 285,18, e 200 passa a ser 70,1%
+        gastar(20_000)
+        assertTrue(codigos().isEmpty())
+        ambiente.cadastros.salvar(
+            ContaFixa(40_000, data(1, 10), descricao = "Curso", diaVencimento = 10),
+            segunda,
+        )
+        ambiente.alertas.rotinaDiaria(data(6, 10), agora)
+        assertTrue(codigos().toString(), CodigoAlerta.A2 in codigos())
     }
 
     @Test

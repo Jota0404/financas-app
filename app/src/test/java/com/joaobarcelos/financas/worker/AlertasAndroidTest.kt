@@ -17,7 +17,9 @@ import com.joaobarcelos.financas.data.datastore.DataStoreConfiguracoesRepository
 import com.joaobarcelos.financas.data.local.FinancasDatabase
 import com.joaobarcelos.financas.data.repository.RoomHistoricoRepository
 import com.joaobarcelos.financas.data.repository.RoomOrcamentoRepository
+import com.joaobarcelos.financas.domain.calculadora.Orcamento
 import com.joaobarcelos.financas.domain.model.ContaFixa
+import com.joaobarcelos.financas.domain.repository.OrcamentoRepository
 import com.joaobarcelos.financas.domain.model.Entrada
 import com.joaobarcelos.financas.domain.model.Gasto
 import com.joaobarcelos.financas.domain.model.MetaReserva
@@ -30,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -43,6 +46,7 @@ import org.robolectric.Shadows.shadowOf
 import java.io.File
 import java.time.Clock
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneOffset
 
 /** Notificações e rotina diária com o banco de verdade, em segunda, 02/11/2026, às 08:00. */
@@ -124,5 +128,18 @@ class AlertasAndroidTest {
         assertTrue(titulos.toString(), "Resumo da semana" in titulos)
         val proxima = WorkManager.getInstance(contexto).getWorkInfosForUniqueWork(ROTINA_DIARIA).get()
         assertTrue(proxima.any { it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.BLOCKED })
+    }
+
+    @Test
+    fun `erro no fechamento ao abrir o app nao fecha o app e a rotina e agendada`() = runBlocking {
+        // QA Etapa 6, M1: um banco que falha ao ler os dados
+        val quebrado = object : OrcamentoRepository by orcamento {
+            override fun orcamento() = flow<Orcamento> {
+                throw IllegalStateException("dado inesperado no banco")
+            }
+        }
+        var agendada: LocalTime? = null
+        aoAbrirApp(Alertas(quebrado, configuracoes, historico, notificacoes), configuracoes, relogio) { agendada = it }
+        assertEquals(LocalTime.of(8, 0), agendada)
     }
 }
