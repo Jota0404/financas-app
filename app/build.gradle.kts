@@ -44,9 +44,10 @@ android {
     buildTypes {
         release {
             if (assinatura != null) signingConfig = signingConfigs.getByName("release")
+            // O R8 otimiza o app inteiro. Limitar a alguns pacotes (packageScope) fazia a versão final
+            // travar ao abrir (IllegalAccessError numa classe do Kotlin), visto no emulador na Etapa 7.
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
         }
     }
