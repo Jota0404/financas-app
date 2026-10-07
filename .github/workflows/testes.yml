@@ -14,4 +14,6 @@ jobs:
           distribution: temurin
           java-version: 25
       - uses: gradle/actions/setup-gradle@v6
-      - run: ./gradlew test assembleDebug lintDebug
+      # O APK final sai sem assinatura aqui (a chave fica só no Mac do dono), mas o build do release,
+      # com o R8, é conferido a cada push
+      - run: ./gradlew test assembleDebug lintDebug assembleRelease

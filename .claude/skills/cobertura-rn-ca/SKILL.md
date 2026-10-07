@@ -13,6 +13,8 @@ ${CLAUDE_SKILL_DIR}/scripts/cobertura.sh
 ```
 
 O script lê os códigos direto do `docs/briefing.md`, então acompanha o briefing quando ele muda.
+Ele conta só onde cada código é definido (RN em negrito, CA na tabela de critérios), mostra quantos
+leu e para com aviso se não achar nenhum RN ou CA, porque isso indica um briefing cortado.
 Depois procura testes com o código no nome em `domain/src/test`, `app/src/test` e
 `app/src/androidTest`. Ele reconhece os dois formatos de nome de teste do CLAUDE.md:
 `` `RN13 divisao ...`() `` e `RN16_backup_...()`.
