@@ -155,7 +155,7 @@ fun HistoricoTela(vm: HistoricoViewModel = hiltViewModel(), vmGasto: GastoViewMo
                     Text(
                         "Entradas ${formatarReais(resumo.entradas)} · Gastos ${formatarReais(resumo.gastos)} · " +
                             "Sobrou ${formatarReais(resumo.disponivel)}" +
-                            if (resumo.reservaInvadida > 0) "\nReserva invadida em ${formatarReais(resumo.reservaInvadida)}" else "",
+                            if (fechado.reservaInvadida > 0) "\nReserva invadida em ${formatarReais(fechado.reservaInvadida)}" else "",
                     )
                 },
             )

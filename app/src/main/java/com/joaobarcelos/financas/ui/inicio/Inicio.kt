@@ -106,12 +106,14 @@ private fun Painel(estado: EstadoInicio, aoIrParaCadastros: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (estado.semEntradas) {
+            // Sem nada cadastrado, só o convite: a barra vermelha de limite zero assustaria (QA Etapa 5, B1)
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Comece cadastrando o seu salário, as contas fixas e a reserva.")
                     Button(onClick = aoIrParaCadastros) { Text("Ir para Cadastros") }
                 }
             }
+            return@Column
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Disponível da semana", style = MaterialTheme.typography.titleMedium)

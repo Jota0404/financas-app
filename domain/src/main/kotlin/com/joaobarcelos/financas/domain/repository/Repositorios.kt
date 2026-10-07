@@ -40,6 +40,6 @@ interface HistoricoRepository {
 interface ConfiguracoesRepository {
     fun configuracoes(): Flow<Configuracoes>
 
-    /** Altera as configurações de uma vez, ex.: `atualizar { it.comDiaPagamento(15, hoje) }`. */
+    /** Altera as configurações de uma vez, ex.: `atualizar { it.copy(limiteSemanalManual = null) }`. */
     suspend fun atualizar(mudanca: (Configuracoes) -> Configuracoes)
 }

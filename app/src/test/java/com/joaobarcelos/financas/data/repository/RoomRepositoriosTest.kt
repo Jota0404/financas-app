@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.joaobarcelos.financas.data.local.FinancasDatabase
+import com.joaobarcelos.financas.domain.calculadora.Resumo
 import com.joaobarcelos.financas.domain.calculadora.cicloDe
 import com.joaobarcelos.financas.domain.model.CicloFechado
 import com.joaobarcelos.financas.domain.model.ContaFixa
@@ -122,6 +123,15 @@ class RoomRepositoriosTest {
         assertEquals(outubro, fechado.ciclo)
         assertEquals(120_000, fechado.resumo.fixas)
         assertEquals(130_000, orcamento.orcamento().first().resumo(outubro).fixas)
+    }
+
+    @Test
+    fun `ciclo fechado mostra a reserva invadida gravada e nao a recalculada`() = runTest {
+        // QA Etapa 3, B1: se a regra da RN09 mudar, o retrato antigo não muda
+        val resumo = Resumo(300_000, 120_000, 30_000, 160_000)
+        historico.salvar(CicloFechado(outubro, resumo, reservaInvadida = 7_777))
+        assertEquals(10_000, resumo.reservaInvadida)
+        assertEquals(7_777, historico.ciclosFechados().first().single().reservaInvadida)
     }
 
     @Test

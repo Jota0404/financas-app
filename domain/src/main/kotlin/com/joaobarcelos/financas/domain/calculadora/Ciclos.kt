@@ -43,12 +43,15 @@ fun mudarDiaPagamento(atual: Ciclo, novoDia: Int, hoje: LocalDate): MudancaDiaPa
 fun Configuracoes.cicloAtual(hoje: LocalDate): Ciclo =
     cicloIrregular?.takeIf { hoje in it } ?: cicloDe(hoje, diaPagamento)
 
+/** Configurações depois de mudar o dia do pagamento e o ciclo que fecha ontem, se houver. */
+data class NovoDiaPagamento(val configuracoes: Configuracoes, val fechado: Ciclo?)
+
 /**
- * RN01 e P14: configurações depois de mudar o dia do pagamento para [novoDia] em [hoje]. O ciclo atual
- * fica guardado enquanto for diferente do normal do novo dia. O ciclo que fecha, se houver, vem de
- * [mudarDiaPagamento].
+ * RN01 e P14: muda o dia do pagamento para [novoDia] em [hoje]. O ciclo atual fica guardado enquanto
+ * for diferente do normal do novo dia, e o ciclo que fecha vem junto (QA Etapa 3, B2).
  */
-fun Configuracoes.comDiaPagamento(novoDia: Int, hoje: LocalDate): Configuracoes {
-    val atual = mudarDiaPagamento(cicloAtual(hoje), novoDia, hoje).atual
-    return copy(diaPagamento = novoDia, cicloIrregular = atual.takeIf { it != cicloDe(hoje, novoDia) })
+fun Configuracoes.comDiaPagamento(novoDia: Int, hoje: LocalDate): NovoDiaPagamento {
+    val mudanca = mudarDiaPagamento(cicloAtual(hoje), novoDia, hoje)
+    val config = copy(diaPagamento = novoDia, cicloIrregular = mudanca.atual.takeIf { it != cicloDe(hoje, novoDia) })
+    return NovoDiaPagamento(config, mudanca.fechado)
 }

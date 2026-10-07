@@ -76,8 +76,16 @@ data class Categoria(val id: Long, val nome: String, val icone: String) {
     }
 }
 
-/** Retrato de um ciclo no fechamento: os totais ficam guardados, e editar um cadastro não os muda (RN05). */
-data class CicloFechado(val ciclo: Ciclo, val resumo: Resumo, val id: Long = 0)
+/**
+ * Retrato de um ciclo no fechamento: os totais ficam guardados, e editar um cadastro não os muda (RN05).
+ * [reservaInvadida] é o valor gravado no fechamento, não recalculado (QA Etapa 3, B1).
+ */
+data class CicloFechado(
+    val ciclo: Ciclo,
+    val resumo: Resumo,
+    val reservaInvadida: Long = resumo.reservaInvadida,
+    val id: Long = 0,
+)
 
 /**
  * Configurações do usuário. [cicloIrregular] guarda o ciclo atual quando uma mudança do dia do

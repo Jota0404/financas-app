@@ -97,9 +97,9 @@ data class CicloFechadoEntity(
 )
 
 fun CicloFechadoEntity.paraDominio() =
-    CicloFechado(Ciclo(inicio, fim), Resumo(totalEntradas, totalFixas, totalReserva, totalGastos), id)
+    CicloFechado(Ciclo(inicio, fim), Resumo(totalEntradas, totalFixas, totalReserva, totalGastos), reservaInvadidaCentavos, id)
 fun CicloFechado.paraEntidade() = CicloFechadoEntity(
-    id, ciclo.inicio, ciclo.fim, resumo.entradas, resumo.fixas, resumo.reserva, resumo.gastos, resumo.reservaInvadida,
+    id, ciclo.inicio, ciclo.fim, resumo.entradas, resumo.fixas, resumo.reserva, resumo.gastos, reservaInvadida,
 )
 
 /** O índice único impede o mesmo alerta duas vezes no mesmo período. */

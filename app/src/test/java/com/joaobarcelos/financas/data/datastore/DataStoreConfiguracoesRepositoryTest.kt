@@ -75,7 +75,7 @@ class DataStoreConfiguracoesRepositoryTest {
     @Test
     fun `RN01 ciclo irregular depois de mudar o dia fica guardado ate o fim dele`() = runTest {
         // P14: mudar de 1 para 15 em 20/10 deixa o ciclo atual de 01/10 a 14/11
-        abrir().atualizar { it.comDiaPagamento(15, hoje = LocalDate.of(2026, 10, 20)) }
+        abrir().atualizar { it.comDiaPagamento(15, hoje = LocalDate.of(2026, 10, 20)).configuracoes }
         val config = abrir().configuracoes().first()
         assertEquals(Ciclo(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 11, 14)), config.cicloAtual(LocalDate.of(2026, 10, 25)))
         assertEquals(Ciclo(LocalDate.of(2026, 11, 15), LocalDate.of(2026, 12, 14)), config.cicloAtual(LocalDate.of(2026, 11, 15)))

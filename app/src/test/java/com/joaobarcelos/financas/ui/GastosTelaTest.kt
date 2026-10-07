@@ -105,9 +105,11 @@ class GastosTelaTest {
     }
 
     @Test
-    fun `inicio sem entradas orienta a cadastrar`() {
+    fun `inicio sem entradas orienta a cadastrar e nao mostra a barra vermelha`() {
         inicio()
         esperar("Comece cadastrando o seu salário")
+        tela.onNodeWithText("Sem limite nesta semana", substring = true).assertDoesNotExist()
+        tela.onNodeWithText("Disponível da semana").assertDoesNotExist()
     }
 
     @Test
