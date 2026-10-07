@@ -79,5 +79,7 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
+    // O Compose traz o Espresso 3.5, que não funciona no Android 17
+    androidTestImplementation(libs.androidx.test.espresso.core)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
