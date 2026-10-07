@@ -9,17 +9,50 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.joaobarcelos.financas.domain.model.Categoria
+import com.joaobarcelos.financas.domain.model.ContaFixa
+import com.joaobarcelos.financas.domain.model.Entrada
+import com.joaobarcelos.financas.domain.model.MetaReserva
+import com.joaobarcelos.financas.domain.model.TipoEntrada
+import com.joaobarcelos.financas.domain.model.TipoMeta
+import com.joaobarcelos.financas.domain.repository.OrcamentoRepository
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
+import java.time.LocalDate
+import javax.inject.Inject
 
-/** CA12 no aparelho, com o app de verdade. */
-@RunWith(AndroidJUnit4::class)
+/**
+ * CA12 no aparelho, com o app de verdade e o banco em memória (ArmazenamentoDeTeste): o teste não lê
+ * nem grava os dados reais. Rodar só no emulador, com ANDROID_SERIAL=emulator-5554.
+ */
+@HiltAndroidTest
 class RegistrarGastoTest {
-    @get:Rule
+    @get:Rule(order = 0)
+    val hilt = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
     val tela = createAndroidComposeRule<MainActivity>()
+
+    @Inject
+    lateinit var orcamento: OrcamentoRepository
+
+    /** Cenário base do briefing, num banco vazio. */
+    @Before
+    fun cenarioBase() = runBlocking {
+        hilt.inject()
+        val inicio = LocalDate.now().withDayOfMonth(1)
+        orcamento.salvar(Entrada(300_000, TipoEntrada.RECORRENTE, inicio, descricao = "Salário"))
+        orcamento.salvar(ContaFixa(100_000, inicio, descricao = "Aluguel", diaVencimento = 5))
+        orcamento.salvar(MetaReserva(TipoMeta.PERCENTUAL, 1000, nome = "Reserva"))
+        Unit
+    }
 
     private fun existe(texto: String) = tela.onAllNodes(hasText(texto, substring = true)).fetchSemanticsNodes().isNotEmpty()
 
@@ -35,14 +68,12 @@ class RegistrarGastoTest {
         tela.waitUntil(5_000) { tela.onAllNodes(valorComFoco).fetchSemanticsNodes().isNotEmpty() }
         tela.onNode(valorComFoco).performTextInput("12,34")
         tocar(tela.onNodeWithText("Salvar"))
-        assertTrue("foram $toques toques", toques <= 3)
 
-        // Conferência, fora da contagem: o gasto está no Histórico, em Outros.
-        // Se o aparelho já tiver gastos, pode aparecer o aviso de reserva invadida.
-        tela.waitUntil(5_000) { !existe("Novo gasto") || existe("Entendi") }
-        if (existe("Entendi")) tela.onNodeWithText("Entendi").performClick()
-        tela.onNodeWithText("Histórico").performClick()
-        tela.waitUntil(5_000) { existe("R$ 12,34") }
-        assertTrue(existe("Outros"))
+        tela.waitUntil(5_000) { runBlocking { orcamento.orcamento().first().gastos.isNotEmpty() } }
+        assertTrue("foram $toques toques", toques <= 3)
+        val gasto = runBlocking { orcamento.orcamento().first().gastos.single() }
+        assertEquals(1_234L, gasto.valorCentavos)
+        assertEquals(Categoria.OUTROS, gasto.categoriaId)
+        assertEquals(LocalDate.now(), gasto.data)
     }
 }

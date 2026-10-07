@@ -32,19 +32,7 @@ abstract class DadosModule {
 
     companion object {
         @Provides
-        @Singleton
-        fun banco(@ApplicationContext context: Context): FinancasDatabase =
-            Room.databaseBuilder(context, FinancasDatabase::class.java, "financas.db")
-                .addCallback(FinancasDatabase.CriarCategoriasPadrao)
-                .build()
-
-        @Provides
         fun dao(banco: FinancasDatabase) = banco.dao()
-
-        @Provides
-        @Singleton
-        fun dataStore(@ApplicationContext context: Context): DataStore<Preferences> =
-            DataStoreConfiguracoesRepository.criarDataStore { context.preferencesDataStoreFile("configuracoes") }
 
         @Provides
         fun relogio(): Clock = Clock.systemDefaultZone()
@@ -53,4 +41,21 @@ abstract class DadosModule {
         fun cadastros(orcamento: OrcamentoRepository, configuracoes: ConfiguracoesRepository) =
             Cadastros(orcamento, configuracoes)
     }
+}
+
+/** Onde os dados ficam: o banco e o arquivo de configurações. Os testes no aparelho trocam por memória. */
+@Module
+@InstallIn(SingletonComponent::class)
+object ArmazenamentoModule {
+    @Provides
+    @Singleton
+    fun banco(@ApplicationContext context: Context): FinancasDatabase =
+        Room.databaseBuilder(context, FinancasDatabase::class.java, "financas.db")
+            .addCallback(FinancasDatabase.CriarCategoriasPadrao)
+            .build()
+
+    @Provides
+    @Singleton
+    fun dataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        DataStoreConfiguracoesRepository.criarDataStore { context.preferencesDataStoreFile("configuracoes") }
 }
