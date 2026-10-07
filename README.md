@@ -28,7 +28,7 @@ financas-app/
 │   ├── agents/                agentes coder (desenvolvedor) e qa (revisor)
 │   └── skills/                /verificar, /testar-emulador e /cobertura-rn-ca
 ├── app/src/main/java/com/joaobarcelos/financas/   módulo :app (Android)
-│   ├── ui/                    telas e ViewModels, uma pasta por funcionalidade
+│   ├── ui/                    telas e ViewModels, uma pasta por funcionalidade (FolegoApp.kt: abas)
 │   │   ├── inicio/            tela inicial (disponível da semana e do ciclo)
 │   │   ├── gastos/            registro de novo gasto
 │   │   ├── cadastros/         contas fixas, entradas e metas de reserva
@@ -44,7 +44,8 @@ financas-app/
 │   ├── worker/                agendamento e disparo dos alertas (WorkManager)
 │   └── di/                    módulos do Hilt
 ├── app/src/test/java/com/joaobarcelos/financas/
-│   └── data/                  testes do banco, dos repositórios e do DataStore (Robolectric, sem aparelho)
+│   ├── data/                  testes do banco, dos repositórios e do DataStore (Robolectric, sem aparelho)
+│   └── ui/                    testes de tela (Robolectric, sem aparelho)
 ├── app/schemas/               esquema do banco a cada versão, base para as migrações do Room
 ├── app/src/androidTest/java/com/joaobarcelos/financas/
 │   └── BackupTest.kt          teste no aparelho: backup automático ligado (RN16)
@@ -53,6 +54,7 @@ financas-app/
 │   │   ├── model/             modelos do domínio (Entrada, ContaFixa, Gasto...)
 │   │   ├── usecase/           casos de uso (ações do app)
 │   │   ├── repository/        interfaces dos repositórios (implementadas no :app, em data/)
+│   │   ├── formato/           reais, percentuais e datas no formato brasileiro
 │   │   └── calculadora/       cálculos de ciclo, reserva, disponível e limite semanal
 │   └── src/test/kotlin/...    testes das regras (RN) e dos critérios de aceite (CA)
 ├── CLAUDE.md                  regras de trabalho para o assistente de desenvolvimento

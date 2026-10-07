@@ -1,9 +1,9 @@
 # Andamento do projeto
 
-Atualizado em 05/10/2026.
+Atualizado em 06/10/2026.
 
-**Etapa atual:** 3 de 7 (Persistência) concluída e entregue ao QA. Aguarda a revisão do QA e a
-aprovação do dono antes da Etapa 4.
+**Etapa atual:** 4 de 7 (Cadastros) concluída e entregue ao QA. Aguarda a revisão do QA e a
+aprovação do dono antes da Etapa 5.
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -13,8 +13,8 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | --- | --- |
 | 1. Setup | ✅ Concluída e aprovada em 05/10/2026 |
 | 2. Domínio (só Kotlin puro, RN01 a RN15) | ✅ Concluída e aprovada em 05/10/2026 |
-| 3. Persistência (Room, DAOs, DataStore) | 🔍 Concluída em 05/10/2026, aguardando QA e aprovação |
-| 4. Cadastros | ⏳ Não iniciada |
+| 3. Persistência (Room, DAOs, DataStore) | ✅ Concluída e aprovada em 06/10/2026 |
+| 4. Cadastros | 🔍 Concluída em 06/10/2026, aguardando QA e aprovação |
 | 5. Gastos e Início | ⏳ Não iniciada |
 | 6. Alertas e fechamento de ciclo | ⏳ Não iniciada |
 | 7. Onboarding, configurações e acabamento | ⏳ Não iniciada |
@@ -75,6 +75,30 @@ configurações, o backup do Android (`bmgr backupnow`) funcionou, e depois de d
 reinstalar o app os dois arquivos voltaram com o conteúdo original. Observação: o Android só faz
 backup de um app que já foi aberto pelo menos uma vez depois de instalado.
 
+## O que já existe (Etapa 4)
+
+As primeiras telas. O app abre com a navegação de baixo nas quatro abas do briefing; Início,
+Histórico e Configurações ainda mostram em que etapa chegam. A aba **Cadastros** tem três telas:
+
+| Tela | O que faz |
+| --- | --- |
+| Contas fixas | Lista com valor, vencimento e situação ("Parcela 3 de 10", "Sem fim", "Terminou", "Encerrada"). Cadastrar, editar, encerrar (sempre) e excluir (só a conta que começa no ciclo atual, RN04/P17) |
+| Entradas | Recorrentes e avulsas separadas. A recorrente vem com o início do ciclo atual; a avulsa, com hoje, e só aceita datas do ciclo atual até hoje |
+| Metas de reserva | Valor efetivo no ciclo atual (ex.: "10% das entradas · R$ 300,00 neste ciclo"). Pausar com a chave "Ativa" |
+
+As decisões saem prontas do domínio (`usecase/Cadastros.kt`), e a tela só aplica:
+- RN15 em todo cadastro, mais nome obrigatório, vencimento de 1 a 31, duração e parcela válidas;
+- RN08: a meta que não cabe é bloqueada com quanto falta (CA04: "faltam R$ 500,00"); a conta ou
+  entrada que deixa as metas sem caber é salva com aviso; sem meta ativa, não há aviso.
+
+Valores em reais e percentuais são lidos e mostrados no formato brasileiro, sem `Double`
+(`domain/.../formato/Formatos.kt`). Toda lista vazia orienta: "Nenhuma conta fixa ainda. Toque
+em + para adicionar."
+
+**Visto no emulador (Android 17), nos temas claro e escuro:** cenário base cadastrado pela tela
+(aluguel, celular de 3 meses, salário e reserva de 10%); a meta de R$ 2.000,00 foi bloqueada com
+"faltam R$ 500,00"; nenhum travamento no log.
+
 ## Versões principais
 
 | Item | Versão |
@@ -88,17 +112,21 @@ backup de um app que já foi aberto pelo menos uma vez depois de instalado.
 | activity-compose | 1.13.0 |
 | Room | 2.8.5 |
 | DataStore | 1.2.1 |
+| Lifecycle (Compose) | 2.11.0 |
+| Hilt para Compose | 1.4.0 |
 | Robolectric (testes) | 4.17 |
 | compileSdk / targetSdk | 37 |
 
 ## Testes
 
-- **Domínio:** 82 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
+- **Domínio:** 106 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
   RN de RN01 a RN15 tem teste com o código no nome, e os critérios CA01 a CA07, CA09, CA10 e
   CA13 a CA16 estão em `CriteriosDeAceiteTest.kt`, com o cenário base do briefing
   (`CenarioBase.kt`) e os valores exatos em centavos.
-- **Persistência:** 17 testes em `app/src/test/.../data/` (banco, repositórios e DataStore). Rodam no
-  computador com Robolectric, sem aparelho, e por isso também no GitHub Actions.
+- **App:** 26 testes em `app/src/test/`: 17 de persistência (banco, repositórios e DataStore) e 9
+  de tela da aba Cadastros (estados vazios, parcela, CA04 bloqueado na tela, aviso da RN08,
+  encerrar e excluir conta, RN15). Rodam no computador com Robolectric, sem aparelho, e por isso
+  também no GitHub Actions.
 - **No aparelho:** 1 teste instrumentado (`BackupTest`, RN16). Ele roda no emulador, com
   `./gradlew connectedDebugAndroidTest`, e não roda no GitHub Actions, porque precisa de um aparelho.
 - **Ainda sem teste, como previsto:** CA08 e CA11 (Etapa 6, alertas e fechamento de ciclo) e CA12
@@ -138,16 +166,22 @@ backup de um app que já foi aberto pelo menos uma vez depois de instalado.
   o que "fixo" quer dizer no limite semanal (RN11).
 - Revisão do QA da Etapa 3 ([`qa/2026-10-06-etapa-3.md`](qa/2026-10-06-etapa-3.md)): aprovada com
   ressalvas, sem itens Críticos ou Altos. O M1 (salvar configurações com o arquivo do DataStore
-  corrompido) fica para o começo da Etapa 4; B1 e B2 para a Etapa 6. Decisão do dono sobre a P17,
+  corrompido) foi resolvido no começo da Etapa 4; B1 e B2 ficam para a Etapa 6. Decisão do dono sobre a P17,
   registrada no briefing (RN04): conta fixa que já foi descontada é encerrada, não excluída;
   excluir só serve para conta cadastrada por engano.
-- Atalho do Ponytail da Etapa 2 (campos dos modelos) resolvido nesta etapa. Novo atalho:
-  `FinancasDao.kt:30` carrega os gastos de todos os ciclos; filtrar por data se o histórico pesar.
+- O B1 da Etapa 2 (o domínio decide se bloqueia ou só avisa ao salvar meta) foi feito na Etapa 4,
+  e o CA04 passou a conferir o bloqueio.
+- Decisões do dono no começo da Etapa 4, registradas no briefing: conta com duração informa a
+  parcela do ciclo atual; entrada recorrente vem com o início do ciclo atual; entrada avulsa só
+  aceita datas do ciclo atual até hoje (como a RN14); só se exclui conta que começa no ciclo atual;
+  sem meta ativa, salvar conta ou entrada não avisa (RN08).
+- Atalhos do Ponytail: `FinancasDao.kt:30` carrega os gastos de todos os ciclos (filtrar por data
+  se o histórico pesar); `FolegoApp.kt:70` mostra "em breve" nas abas que ainda não existem (sai
+  quando cada tela chegar).
 - O GitHub avisou que o runner `ubuntu-latest` passa para o Ubuntu 26 a partir de 19/10/2026.
   Não exige ação agora: vale conferir se os testes continuam passando depois dessa data.
 
 ## Próximo passo
 
-Revisão do QA da Etapa 3 e aprovação do dono. Depois, a Etapa 4 (Cadastros): telas de contas
-fixas, entradas e metas de reserva, com seus ViewModels. Na Etapa 4 entra também o B1 do QA da
-Etapa 2 (o domínio decide se bloqueia ou só avisa ao salvar uma meta).
+Revisão do QA da Etapa 4 e aprovação do dono. Depois, a Etapa 5 (Gastos e Início): tela inicial
+com o disponível da semana, novo gasto em até 3 toques (CA12) e histórico.
