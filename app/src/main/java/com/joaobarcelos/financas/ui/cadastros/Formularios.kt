@@ -2,6 +2,7 @@ package com.joaobarcelos.financas.ui.cadastros
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
@@ -18,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import com.joaobarcelos.financas.domain.formato.formatarPercentual
 import com.joaobarcelos.financas.domain.formato.lerCentavos
@@ -36,9 +38,13 @@ import java.time.LocalDate
 
 @Composable
 private fun LinhaComChave(texto: String, ligado: Boolean, aoMudar: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+    // A linha inteira liga e desliga, não só a chave
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().toggleable(value = ligado, role = Role.Switch, onValueChange = aoMudar),
+    ) {
         Text(texto, modifier = Modifier.weight(1f))
-        Switch(checked = ligado, onCheckedChange = aoMudar)
+        Switch(checked = ligado, onCheckedChange = null)
     }
 }
 
