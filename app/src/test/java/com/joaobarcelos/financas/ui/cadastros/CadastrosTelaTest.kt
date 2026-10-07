@@ -3,6 +3,7 @@ package com.joaobarcelos.financas.ui.cadastros
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -102,7 +103,7 @@ class CadastrosTelaTest {
     fun `cadastrar financiamento na parcela 3 de 10 pelo formulario`() {
         tela.setContent { ContasTela(vmContas) }
         esperar("Nenhuma conta fixa ainda.")
-        tela.onNodeWithContentDescription("Adicionar").performClick()
+        tela.onNodeWithContentDescription("Adicionar conta fixa").performClick()
         campo("Nome (ex.: Aluguel)").performTextInput("Financiamento")
         campo("Valor (R$)").performTextInput("300")
         campo("Dia do vencimento").performTextInput("15")
@@ -119,7 +120,7 @@ class CadastrosTelaTest {
         salvarCenarioBase()
         tela.setContent { MetasTela(vmMetas) }
         esperar("R$ 300,00 neste ciclo")
-        tela.onNodeWithContentDescription("Adicionar").performClick()
+        tela.onNodeWithContentDescription("Adicionar meta").performClick()
         campo("Nome (ex.: Reserva de segurança)").performTextInput("Viagem")
         tela.onNodeWithText("Valor fixo").performClick()
         campo("Valor (R$)").performTextInput("2.000,00")
@@ -133,7 +134,7 @@ class CadastrosTelaTest {
         salvarCenarioBase()
         tela.setContent { ContasTela(vmContas) }
         esperar("Aluguel")
-        tela.onNodeWithContentDescription("Adicionar").performClick()
+        tela.onNodeWithContentDescription("Adicionar conta fixa").performClick()
         campo("Nome (ex.: Aluguel)").performTextInput("Escola")
         campo("Valor (R$)").performTextInput("1.700,00")
         campo("Dia do vencimento").performTextInput("10")
@@ -169,7 +170,7 @@ class CadastrosTelaTest {
     fun `RN15 entrada de valor zero e bloqueada na tela`() {
         tela.setContent { EntradasTela(vmEntradas) }
         esperar("Nenhuma entrada ainda.")
-        tela.onNodeWithContentDescription("Adicionar").performClick()
+        tela.onNodeWithContentDescription("Adicionar entrada").performClick()
         campo("Nome (ex.: Salário)").performTextInput("Salário")
         campo("Valor (R$)").performTextInput("0")
         tela.onNodeWithText("Salvar").performClick()
@@ -181,12 +182,75 @@ class CadastrosTelaTest {
     fun `salario novo vem com o inicio do ciclo e aparece em recorrentes`() {
         tela.setContent { EntradasTela(vmEntradas) }
         esperar("Nenhuma entrada ainda.")
-        tela.onNodeWithContentDescription("Adicionar").performClick()
+        tela.onNodeWithContentDescription("Adicionar entrada").performClick()
         esperar("Entra a partir de: 01/10/2026")
         campo("Nome (ex.: Salário)").performTextInput("Salário")
         campo("Valor (R$)").performTextInput("3.000,00")
         tela.onNodeWithText("Salvar").performClick()
         esperar("Recorrentes")
         esperar("R$ 3.000,00 · desde 01/10/2026")
+    }
+
+    @Test
+    fun `valor com ponto nos centavos e aceito`() {
+        tela.setContent { EntradasTela(vmEntradas) }
+        esperar("Nenhuma entrada ainda.")
+        tela.onNodeWithContentDescription("Adicionar entrada").performClick()
+        campo("Nome (ex.: Salário)").performTextInput("Salário")
+        campo("Valor (R$)").performTextInput("1500.50")
+        tela.onNodeWithText("Salvar").performClick()
+        esperar("R$ 1.500,50 · desde 01/10/2026")
+    }
+
+    @Test
+    fun `texto que nao e numero tem mensagem propria`() {
+        tela.setContent { ContasTela(vmContas) }
+        esperar("Nenhuma conta fixa ainda.")
+        tela.onNodeWithContentDescription("Adicionar conta fixa").performClick()
+        campo("Nome (ex.: Aluguel)").performTextInput("Aluguel")
+        campo("Valor (R$)").performTextInput("mil")
+        tela.onNodeWithText("Salvar").performClick()
+        esperar("Digite o valor assim: 1.500,00 ou 1500.50.")
+    }
+
+    @Test
+    fun `girar o celular nao fecha o formulario nem perde o que foi digitado`() {
+        // QA B1: a restauração simula girar o celular ou trocar o tema com o formulário aberto
+        val restauracao = StateRestorationTester(tela)
+        restauracao.setContent { ContasTela(vmContas) }
+        esperar("Nenhuma conta fixa ainda.")
+        tela.onNodeWithContentDescription("Adicionar conta fixa").performClick()
+        campo("Nome (ex.: Aluguel)").performTextInput("Aluguel")
+        campo("Valor (R$)").performTextInput("1.000,00")
+        restauracao.emulateSavedInstanceStateRestore()
+        esperar("Nova conta fixa")
+        tela.onNodeWithText("Aluguel").assertExists()
+        tela.onNodeWithText("1.000,00").assertExists()
+    }
+
+    @Test
+    fun `RN04 encurtar conta antiga para tirar do ciclo e bloqueado na tela`() {
+        // QA M1: financiamento na parcela 3 de 10 editado para 1 mês
+        runBlocking {
+            orcamento.salvar(ContaFixa(30_000, LocalDate.of(2026, 8, 1), duracaoMeses = 10, descricao = "Financiamento", diaVencimento = 15))
+        }
+        tela.setContent { ContasTela(vmContas) }
+        esperar("Parcela 3 de 10")
+        tela.onNodeWithText("Financiamento").performClick()
+        campo("Duração (meses)").performTextReplacement("1")
+        tela.onNodeWithText("Salvar").performClick()
+        esperar("Para tirar a conta deste ciclo, encerre.")
+        assertEquals(10, runBlocking { orcamento.orcamento().first().contas.single().duracaoMeses })
+    }
+
+    @Test
+    fun `P18 avulsa de ciclo fechado nao aparece em Entradas`() {
+        runBlocking {
+            orcamento.salvar(Entrada(50_000, TipoEntrada.AVULSA, LocalDate.of(2026, 9, 20), descricao = "Freela de setembro"))
+            orcamento.salvar(Entrada(40_000, TipoEntrada.AVULSA, LocalDate.of(2026, 10, 3), descricao = "Freela de outubro"))
+        }
+        tela.setContent { EntradasTela(vmEntradas) }
+        esperar("Freela de outubro")
+        tela.onNodeWithText("Freela de setembro").assertDoesNotExist()
     }
 }

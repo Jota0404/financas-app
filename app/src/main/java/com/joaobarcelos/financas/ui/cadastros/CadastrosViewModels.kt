@@ -80,10 +80,11 @@ class EntradasViewModel @Inject constructor(
     relogio: Clock,
 ) : CadastroViewModel<EstadoEntradas>(cadastros, orcamento, configuracoes, relogio, { ciclo, hoje, dados ->
     val (recorrentes, avulsas) = dados.entradas.partition { it.tipo == TipoEntrada.RECORRENTE }
-    EstadoEntradas(ciclo, hoje, recorrentes.sortedBy { it.dataInicio }, avulsas.sortedByDescending { it.dataInicio })
+    // P18: avulsas de ciclos fechados ficam só no Histórico
+    EstadoEntradas(ciclo, hoje, recorrentes.sortedBy { it.dataInicio }, avulsas.filter { it.dataInicio in ciclo }.sortedByDescending { it.dataInicio })
 }) {
     suspend fun salvar(entrada: Entrada): Decisao = ateOFim { cadastros.salvar(entrada, hoje()) }
-    suspend fun excluir(entrada: Entrada) = ateOFim { cadastros.excluir(entrada) }
+    suspend fun excluir(entrada: Entrada): Decisao = ateOFim { cadastros.excluir(entrada, hoje()) }
 }
 
 data class ItemMeta(val meta: MetaReserva, val valorNoCiclo: Long)

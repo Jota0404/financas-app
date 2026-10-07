@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,7 +35,7 @@ import com.joaobarcelos.financas.domain.usecase.inicioPelaParcela
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-// Texto que não é número vira 0, e o domínio bloqueia com a mensagem da RN15.
+// Texto que não é número tem mensagem própria; o resto das regras vem do domínio.
 
 @Composable
 private fun LinhaComChave(texto: String, ligado: Boolean, aoMudar: (Boolean) -> Unit) {
@@ -65,18 +66,19 @@ private fun <T> Escolha(opcoes: List<Pair<T, String>>, escolhida: T, aoEscolher:
 fun FormularioConta(conta: ContaFixa?, ciclo: Ciclo, podeExcluir: Boolean, vm: ContasViewModel, aoFechar: () -> Unit) {
     val escopo = rememberCoroutineScope()
     val estado = remember { EstadoFormulario(aoFechar) }
-    var descricao by remember { mutableStateOf(conta?.descricao.orEmpty()) }
-    var valor by remember { mutableStateOf(conta?.let { textoDoValor(it.valorCentavos) }.orEmpty()) }
-    var vencimento by remember { mutableStateOf(conta?.diaVencimento?.toString().orEmpty()) }
-    var semFim by remember { mutableStateOf(conta?.duracaoMeses == null) }
-    var duracao by remember { mutableStateOf(conta?.duracaoMeses?.toString().orEmpty()) }
-    var parcela by remember { mutableStateOf("1") }
-    var confirmar by remember { mutableStateOf<String?>(null) }
+    var descricao by rememberSaveable { mutableStateOf(conta?.descricao.orEmpty()) }
+    var valor by rememberSaveable { mutableStateOf(conta?.let { textoDoValor(it.valorCentavos) }.orEmpty()) }
+    var vencimento by rememberSaveable { mutableStateOf(conta?.diaVencimento?.toString().orEmpty()) }
+    var semFim by rememberSaveable { mutableStateOf(conta?.duracaoMeses == null) }
+    var duracao by rememberSaveable { mutableStateOf(conta?.duracaoMeses?.toString().orEmpty()) }
+    var parcela by rememberSaveable { mutableStateOf("1") }
+    var confirmar by rememberSaveable { mutableStateOf<String?>(null) }
 
     Formulario(
         titulo = if (conta == null) "Nova conta fixa" else "Editar conta fixa",
         estado = estado,
-        aoSalvar = {
+        aoSalvar = salvar@{
+            val centavos = lerCentavos(valor) ?: return@salvar estado.valorIlegivel()
             val meses = if (semFim) null else duracao.toIntOrNull() ?: 0
             val inicio = when {
                 conta != null -> conta.cicloInicio
@@ -85,7 +87,7 @@ fun FormularioConta(conta: ContaFixa?, ciclo: Ciclo, podeExcluir: Boolean, vm: C
                 else -> inicioPelaParcela(ciclo, parcela.toIntOrNull() ?: 0)
             }
             val nova = ContaFixa(
-                valorCentavos = lerCentavos(valor) ?: 0,
+                valorCentavos = centavos,
                 cicloInicio = inicio,
                 duracaoMeses = meses,
                 encerradaEm = conta?.encerradaEm,
@@ -138,20 +140,21 @@ fun FormularioConta(conta: ContaFixa?, ciclo: Ciclo, podeExcluir: Boolean, vm: C
 fun FormularioEntrada(entrada: Entrada?, ciclo: Ciclo, hoje: LocalDate, vm: EntradasViewModel, aoFechar: () -> Unit) {
     val escopo = rememberCoroutineScope()
     val estado = remember { EstadoFormulario(aoFechar) }
-    var descricao by remember { mutableStateOf(entrada?.descricao.orEmpty()) }
-    var valor by remember { mutableStateOf(entrada?.let { textoDoValor(it.valorCentavos) }.orEmpty()) }
-    var tipo by remember { mutableStateOf(entrada?.tipo ?: TipoEntrada.RECORRENTE) }
+    var descricao by rememberSaveable { mutableStateOf(entrada?.descricao.orEmpty()) }
+    var valor by rememberSaveable { mutableStateOf(entrada?.let { textoDoValor(it.valorCentavos) }.orEmpty()) }
+    var tipo by rememberSaveable { mutableStateOf(entrada?.tipo ?: TipoEntrada.RECORRENTE) }
     // decisão do dono: recorrente começa no início do ciclo atual; avulsa, hoje
-    var inicio by remember { mutableStateOf(entrada?.dataInicio ?: dataPadrao(tipo, ciclo.inicio, hoje)) }
-    var fim by remember { mutableStateOf(entrada?.dataFim) }
-    var confirmarExclusao by remember { mutableStateOf(false) }
+    var inicio by rememberSaveable { mutableStateOf(entrada?.dataInicio ?: dataPadrao(tipo, ciclo.inicio, hoje)) }
+    var fim by rememberSaveable { mutableStateOf(entrada?.dataFim) }
+    var confirmarExclusao by rememberSaveable { mutableStateOf(false) }
 
     Formulario(
         titulo = if (entrada == null) "Nova entrada" else "Editar entrada",
         estado = estado,
-        aoSalvar = {
+        aoSalvar = salvar@{
+            val centavos = lerCentavos(valor) ?: return@salvar estado.valorIlegivel()
             val nova = Entrada(
-                valorCentavos = lerCentavos(valor) ?: 0,
+                valorCentavos = centavos,
                 tipo = tipo,
                 dataInicio = inicio,
                 dataFim = if (tipo == TipoEntrada.RECORRENTE) fim else null,
@@ -187,7 +190,7 @@ fun FormularioEntrada(entrada: Entrada?, ciclo: Ciclo, hoje: LocalDate, vm: Entr
             titulo = "Excluir ${entrada.descricao}?",
             texto = "A entrada sai do ciclo atual e dos próximos. Os ciclos já fechados não mudam.",
             botao = "Excluir",
-            aoConfirmar = { escopo.launch { vm.excluir(entrada); aoFechar() } },
+            aoConfirmar = { escopo.launch { confirmarExclusao = false; estado.aplicar(vm.excluir(entrada)) } },
             aoCancelar = { confirmarExclusao = false },
         )
     }
@@ -197,9 +200,9 @@ fun FormularioEntrada(entrada: Entrada?, ciclo: Ciclo, hoje: LocalDate, vm: Entr
 fun FormularioMeta(meta: MetaReserva?, vm: MetasViewModel, aoFechar: () -> Unit) {
     val escopo = rememberCoroutineScope()
     val estado = remember { EstadoFormulario(aoFechar) }
-    var nome by remember { mutableStateOf(meta?.nome.orEmpty()) }
-    var tipo by remember { mutableStateOf(meta?.tipo ?: TipoMeta.PERCENTUAL) }
-    var valor by remember {
+    var nome by rememberSaveable { mutableStateOf(meta?.nome.orEmpty()) }
+    var tipo by rememberSaveable { mutableStateOf(meta?.tipo ?: TipoMeta.PERCENTUAL) }
+    var valor by rememberSaveable {
         mutableStateOf(
             when (meta?.tipo) {
                 null -> ""
@@ -208,15 +211,16 @@ fun FormularioMeta(meta: MetaReserva?, vm: MetasViewModel, aoFechar: () -> Unit)
             },
         )
     }
-    var ativa by remember { mutableStateOf(meta?.ativa ?: true) }
-    var confirmarExclusao by remember { mutableStateOf(false) }
+    var ativa by rememberSaveable { mutableStateOf(meta?.ativa ?: true) }
+    var confirmarExclusao by rememberSaveable { mutableStateOf(false) }
 
     Formulario(
         titulo = if (meta == null) "Nova meta de reserva" else "Editar meta de reserva",
         estado = estado,
-        aoSalvar = {
-            val numero = if (tipo == TipoMeta.PERCENTUAL) lerPontosBase(valor) else lerCentavos(valor)
-            val nova = MetaReserva(tipo, numero ?: 0, ativa, nome.trim(), meta?.id ?: 0)
+        aoSalvar = salvar@{
+            val numero = (if (tipo == TipoMeta.PERCENTUAL) lerPontosBase(valor) else lerCentavos(valor))
+                ?: return@salvar estado.valorIlegivel(percentual = tipo == TipoMeta.PERCENTUAL)
+            val nova = MetaReserva(tipo, numero, ativa, nome.trim(), meta?.id ?: 0)
             escopo.launch { estado.aplicar(vm.salvar(nova)) }
         },
         acoes = {

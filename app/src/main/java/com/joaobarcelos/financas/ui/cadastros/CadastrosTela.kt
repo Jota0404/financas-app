@@ -61,12 +61,13 @@ fun situacaoDaConta(item: ItemConta): String {
 @Composable
 fun ContasTela(vm: ContasViewModel = hiltViewModel()) {
     val estado by vm.estado.collectAsStateWithLifecycle()
-    var aberta by remember { mutableStateOf<ItemConta?>(null) }
-    var nova by remember { mutableStateOf(false) }
+    var abertaId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var nova by rememberSaveable { mutableStateOf(false) }
     ListaDeCadastro(
         carregada = estado != null,
         vazia = estado?.itens.isNullOrEmpty(),
         textoVazio = "Nenhuma conta fixa ainda. Toque em + para adicionar.",
+        textoDoBotao = "Adicionar conta fixa",
         aoAdicionar = { nova = true },
     ) {
         items(estado?.itens.orEmpty(), key = { it.conta.id }) { item ->
@@ -75,25 +76,28 @@ fun ContasTela(vm: ContasViewModel = hiltViewModel()) {
                 supportingContent = {
                     Text("${formatarReais(item.conta.valorCentavos)} · vence dia ${item.conta.diaVencimento}\n${situacaoDaConta(item)}")
                 },
-                modifier = Modifier.clickable { aberta = item },
+                modifier = Modifier.clickable { abertaId = item.conta.id },
             )
         }
     }
     val ciclo = estado?.ciclo ?: return
     if (nova) FormularioConta(null, ciclo, podeExcluir = false, vm = vm, aoFechar = { nova = false })
-    aberta?.let { FormularioConta(it.conta, ciclo, it.podeExcluir, vm, aoFechar = { aberta = null }) }
+    estado?.itens?.find { it.conta.id == abertaId }?.let {
+        FormularioConta(it.conta, ciclo, it.podeExcluir, vm, aoFechar = { abertaId = null })
+    }
 }
 
 @Composable
 fun EntradasTela(vm: EntradasViewModel = hiltViewModel()) {
     val estado by vm.estado.collectAsStateWithLifecycle()
-    var aberta by remember { mutableStateOf<Entrada?>(null) }
-    var nova by remember { mutableStateOf(false) }
+    var abertaId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var nova by rememberSaveable { mutableStateOf(false) }
     val atual = estado
     ListaDeCadastro(
         carregada = atual != null,
         vazia = atual != null && atual.recorrentes.isEmpty() && atual.avulsas.isEmpty(),
         textoVazio = "Nenhuma entrada ainda. Toque em + para adicionar o seu salário ou um freela.",
+        textoDoBotao = "Adicionar entrada",
         aoAdicionar = { nova = true },
     ) {
         if (atual == null) return@ListaDeCadastro
@@ -103,7 +107,7 @@ fun EntradasTela(vm: EntradasViewModel = hiltViewModel()) {
             ListItem(
                 headlineContent = { Text(entrada.descricao) },
                 supportingContent = { Text("${formatarReais(entrada.valorCentavos)} · $periodo") },
-                modifier = Modifier.clickable { aberta = entrada },
+                modifier = Modifier.clickable { abertaId = entrada.id },
             )
         }
         if (atual.avulsas.isNotEmpty()) item { TituloDeSecao("Avulsas") }
@@ -111,24 +115,27 @@ fun EntradasTela(vm: EntradasViewModel = hiltViewModel()) {
             ListItem(
                 headlineContent = { Text(entrada.descricao) },
                 supportingContent = { Text("${formatarReais(entrada.valorCentavos)} · ${formatarData(entrada.dataInicio)}") },
-                modifier = Modifier.clickable { aberta = entrada },
+                modifier = Modifier.clickable { abertaId = entrada.id },
             )
         }
     }
     if (atual == null) return
     if (nova) FormularioEntrada(null, atual.ciclo, atual.hoje, vm, aoFechar = { nova = false })
-    aberta?.let { FormularioEntrada(it, atual.ciclo, atual.hoje, vm, aoFechar = { aberta = null }) }
+    (atual.recorrentes + atual.avulsas).find { it.id == abertaId }?.let {
+        FormularioEntrada(it, atual.ciclo, atual.hoje, vm, aoFechar = { abertaId = null })
+    }
 }
 
 @Composable
 fun MetasTela(vm: MetasViewModel = hiltViewModel()) {
     val estado by vm.estado.collectAsStateWithLifecycle()
-    var aberta by remember { mutableStateOf<ItemMeta?>(null) }
-    var nova by remember { mutableStateOf(false) }
+    var abertaId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var nova by rememberSaveable { mutableStateOf(false) }
     ListaDeCadastro(
         carregada = estado != null,
         vazia = estado?.itens.isNullOrEmpty(),
         textoVazio = "Nenhuma meta de reserva ainda. Toque em + para adicionar.",
+        textoDoBotao = "Adicionar meta",
         aoAdicionar = { nova = true },
     ) {
         items(estado?.itens.orEmpty(), key = { it.meta.id }) { item ->
@@ -139,12 +146,12 @@ fun MetasTela(vm: MetasViewModel = hiltViewModel()) {
                 supportingContent = {
                     Text(if (meta.ativa) "$tipo · ${formatarReais(item.valorNoCiclo)} neste ciclo" else "$tipo · não reserva nada enquanto pausada")
                 },
-                modifier = Modifier.clickable { aberta = item },
+                modifier = Modifier.clickable { abertaId = item.meta.id },
             )
         }
     }
     if (nova) FormularioMeta(null, vm, aoFechar = { nova = false })
-    aberta?.let { FormularioMeta(it.meta, vm, aoFechar = { aberta = null }) }
+    estado?.itens?.find { it.meta.id == abertaId }?.let { FormularioMeta(it.meta, vm, aoFechar = { abertaId = null }) }
 }
 
 /** Entrada nova começa com a data padrão do tipo: recorrente no início do ciclo, avulsa hoje. */

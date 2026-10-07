@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +66,7 @@ fun textoDoBloqueio(bloqueio: Decisao.Bloqueado): String = when (bloqueio.erro) 
     ErroCadastro.FIM_ANTES_DO_INICIO -> "O fim não pode ser antes do início."
     ErroCadastro.METAS_NAO_CABEM ->
         "Esta meta não cabe: faltam ${formatarReais(bloqueio.faltaParaMetas)} para ela ser viável."
+    ErroCadastro.CONTA_SAIRIA_DO_CICLO -> "Para tirar a conta deste ciclo, encerre."
     ErroCadastro.CONTA_JA_DESCONTADA ->
         "Esta conta já foi descontada em ciclos anteriores. Encerre a conta em vez de excluir."
 }
@@ -83,6 +85,11 @@ class EstadoFormulario(private val aoFechar: () -> Unit) {
     }
 
     fun fechar() = aoFechar()
+
+    /** O texto do valor não é um número (ex.: "abc" ou vazio). */
+    fun valorIlegivel(percentual: Boolean = false) {
+        erro = if (percentual) "Digite o percentual assim: 10 ou 10,5." else "Digite o valor assim: 1.500,00 ou 1500.50."
+    }
 }
 
 /** Formulário em tela cheia, com Salvar no alto. [acoes] fica embaixo (encerrar, excluir). */
@@ -148,7 +155,7 @@ fun CampoTexto(rotulo: String, valor: String, aoMudar: (String) -> Unit, teclado
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CampoData(rotulo: String, data: LocalDate?, aoMudar: (LocalDate) -> Unit, aoLimpar: (() -> Unit)? = null) {
-    var aberto by remember { mutableStateOf(false) }
+    var aberto by rememberSaveable { mutableStateOf(false) }
     Row(verticalAlignment = Alignment.CenterVertically) {
         OutlinedButton(onClick = { aberto = true }, modifier = Modifier.weight(1f)) {
             Text("$rotulo: ${data?.let(::formatarData) ?: "sem data"}")
@@ -187,7 +194,14 @@ fun Confirmacao(titulo: String, texto: String, botao: String, aoConfirmar: () ->
 
 /** Lista com o botão "+" e o estado vazio com orientação. Nada aparece enquanto carrega. */
 @Composable
-fun ListaDeCadastro(carregada: Boolean, vazia: Boolean, textoVazio: String, aoAdicionar: () -> Unit, itens: LazyListScope.() -> Unit) {
+fun ListaDeCadastro(
+    carregada: Boolean,
+    vazia: Boolean,
+    textoVazio: String,
+    textoDoBotao: String,
+    aoAdicionar: () -> Unit,
+    itens: LazyListScope.() -> Unit,
+) {
     Box(Modifier.fillMaxSize()) {
         when {
             !carregada -> Unit
@@ -200,7 +214,7 @@ fun ListaDeCadastro(carregada: Boolean, vazia: Boolean, textoVazio: String, aoAd
             else -> LazyColumn(contentPadding = PaddingValues(bottom = 88.dp), content = itens)
         }
         FloatingActionButton(onClick = aoAdicionar, modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
-            Icon(Icons.Filled.Add, contentDescription = "Adicionar")
+            Icon(Icons.Filled.Add, contentDescription = textoDoBotao)
         }
     }
 }
