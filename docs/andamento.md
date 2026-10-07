@@ -2,8 +2,8 @@
 
 Atualizado em 07/10/2026.
 
-**Etapa atual:** 7 de 7 (Onboarding, configurações e acabamento), em andamento. A Etapa 6 foi
-aprovada pelo dono em 07/10/2026.
+**Etapa atual:** 7 de 7 (Onboarding, configurações e acabamento) concluída e entregue ao QA.
+Aguarda a revisão do QA e a aprovação do dono. É a última etapa do roteiro.
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -17,7 +17,7 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | 4. Cadastros | ✅ Concluída e aprovada em 06/10/2026 |
 | 5. Gastos e Início | ✅ Concluída e aprovada em 06/10/2026 |
 | 6. Alertas e fechamento de ciclo | ✅ Concluída e aprovada em 07/10/2026 |
-| 7. Onboarding, configurações e acabamento | 🔨 Em andamento |
+| 7. Onboarding, configurações e acabamento | 🔍 Concluída em 07/10/2026, aguardando QA e aprovação |
 
 ## O que já existe (Etapa 1)
 
@@ -144,6 +144,25 @@ O app avisa sozinho e guarda o retrato de cada ciclo.
 e gastos de R$ 677,77 na semana (limite de R$ 777,77), a notificação "70% do limite da semana"; ao
 forçar a rotina diária, a notificação "Resumo da semana", que não se repetiu na segunda rodada.
 
+## O que já existe (Etapa 7)
+
+O app ficou completo, com as oito telas do briefing.
+
+| Tela ou item | O que faz |
+| --- | --- |
+| Primeiro uso (tela 1) | Assistente em 5 passos: dia do pagamento (padrão 1), salário, contas fixas, metas e permissão de notificação. Os passos 2 a 5 podem ser pulados. Aparece até ser concluído; quem já tem entradas não o vê. O dia escolhido já define o ciclo normal |
+| Configurações (tela 8) | Dia do pagamento (com aviso do efeito no ciclo, RN01 e P14), limite manual (vazio = automático), percentuais de atenção e crítico (atenção menor que crítico), horário dos resumos (reagenda a rotina) e o estado das notificações, com atalho para o Android |
+| Ícone e cores | Ícone "respiro" (três ondas brancas sobre verde), com versão temática. Verde como cor do app nos celulares sem cor dinâmica. No modo escuro, a abertura já é escura (sem clarão) |
+| APK final | Assinado com a chave do Mac do dono, fora do Git (`keystore.properties` e `~/.android/folego-release.jks`). Gerado com `./gradlew assembleRelease` |
+| README | Prints, o que o app faz, como rodar, testar e gerar o APK |
+
+**Visto no emulador (Android 17), com o APK final assinado:** primeiro uso completo (dia, salário,
+aluguel, reserva de 10% e permissão), Início com R$ 440,74 de limite na semana, gasto de R$ 350,00
+com a notificação "70% do limite da semana", rotina diária forçada com o "Resumo da semana" e o
+reagendamento, todas as abas abertas, temas claro e escuro, sem travamentos. **Achado nesta etapa:**
+desde a Etapa 1, o APK final travava ao abrir por causa de uma configuração do otimizador (R8); foi
+corrigido, e o APK final passou a ser conferido no emulador.
+
 ## Versões principais
 
 | Item | Versão |
@@ -166,13 +185,13 @@ forçar a rotina diária, a notificação "Resumo da semana", que não se repeti
 
 ## Testes
 
-- **Domínio:** 144 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
+- **Domínio:** 155 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
   RN de RN01 a RN15 tem teste com o código no nome, e os critérios CA01 a CA07, CA09, CA10 e
   CA13 a CA16 estão em `CriteriosDeAceiteTest.kt`, com o cenário base do briefing
   (`CenarioBase.kt`) e os valores exatos em centavos. O CA08 e o CA11 estão em `AlertasTest.kt`.
-- **App:** 51 testes em `app/src/test/`: persistência (banco, repositórios, DataStore, migração
-  do banco e o CA11 com o banco de verdade), telas (Cadastros, Início, Novo gasto e Histórico, entre
-  eles o CA12 e o CA03), virada do dia, notificação e rotina diária. Rodam no computador com
+- **App:** 59 testes em `app/src/test/`: persistência (banco, repositórios, DataStore, migração
+  do banco e o CA11 com o banco de verdade), telas (Cadastros, Início, Novo gasto, Histórico, primeiro
+  uso e Configurações, entre eles o CA12 e o CA03), virada do dia, notificação e rotina diária. Rodam no computador com
   Robolectric, sem aparelho, e por isso também no GitHub Actions.
 - **No aparelho:** 2 testes instrumentados, `BackupTest` (RN16) e `RegistrarGastoTest` (CA12, com o
   app de verdade e o banco em memória, sem ler nem gravar os dados reais). Rodam **só no
@@ -187,7 +206,7 @@ forçar a rotina diária, a notificação "Resumo da semana", que não se repeti
   agente de QA com acesso às skills). B4 resolvido: o app passou a se chamar **Fôlego**.
   B1, B2, B5 a B8 e os itens 2, 4 e 5 do Ponytail foram resolvidos no começo da Etapa 2.
   B3 (clarão branco ao abrir no modo escuro) e o item 3 do Ponytail (ícones `.webp` sem uso)
-  ficam para a Etapa 7.
+  foram resolvidos na Etapa 7.
 - Mudança no briefing nesta etapa: criada a **RN16** (backup do Android permitido, não conta como
   nuvem do app), e o domínio passou a ser o módulo `:domain`.
 - Decisões do dono sobre as propostas do QA (P1 a P10), registradas no briefing: a RN08 soma todas
@@ -247,9 +266,8 @@ forçar a rotina diária, a notificação "Resumo da semana", que não se repeti
   corrigir um gasto.
 - O retrato de um ciclo fechado com atraso usa os cadastros do momento do fechamento. Se uma conta
   for editada antes de o app rodar na virada, a edição entra no retrato do ciclo anterior.
-- Atalhos do Ponytail: `FinancasDao.kt:30` carrega os gastos de todos os ciclos (filtrar por data
-  se o histórico pesar); `FolegoApp.kt:69` mostra "em breve" no lugar das Configurações (sai na
-  Etapa 7).
+- Atalho do Ponytail que continua: `FinancasDao.kt:30` carrega os gastos de todos os ciclos
+  (filtrar por data se o histórico pesar). O de `FolegoApp.kt` ("em breve") saiu na Etapa 7.
 - O GitHub avisou que o runner `ubuntu-latest` passa para o Ubuntu 26 a partir de 19/10/2026.
   Não exige ação agora: vale conferir se os testes continuam passando depois dessa data.
 
@@ -260,11 +278,17 @@ forçar a rotina diária, a notificação "Resumo da semana", que não se repeti
   isso, a Etapa 6 ficou aprovada com ressalvas e foi aprovada pelo dono em 07/10/2026. Decisão do dono
   sobre a P19, registrada no briefing (seção Alertas): o A1 chega na primeira rotina da semana; o A4
   dispara quando a reserva fica mais invadida; um ciclo fechado com atraso usa os cadastros do
-  momento do fechamento. Ficam para o começo da Etapa 7: M1 (proteger o fechamento ao abrir o app) e
-  B3 (conferir A2 e A3 também na rotina diária). O B1 é do script de cobertura, que é do QA.
+  momento do fechamento. Corrigidos no começo da Etapa 7: M1 (o fechamento ao abrir o app fica
+  protegido, e a rotina é agendada mesmo se ele falhar) e B3 (a rotina diária também confere A2 e A3).
+  O B1 é do script de cobertura, que é do QA.
+- Decisões do dono no começo da Etapa 7, registradas no briefing: passos do primeiro uso podem ser
+  pulados; o dia escolhido no primeiro uso define o ciclo normal; ícone "respiro" verde; chave de
+  assinatura e senha só no Mac; APK só no Mac, sem publicar; atenção menor que crítico. O DataStore
+  ganhou `primeiroUsoConcluido`, registrado no modelo de dados.
+- **Antes de instalar o APK final no celular:** o app instalado pelo botão Run (versão de teste) tem
+  outra assinatura, e o Android só aceita a troca desinstalando, o que apaga os dados. Guarde também
+  uma cópia da chave (`~/.android/folego-release.jks`) e do `keystore.properties` num lugar seguro.
 
 ## Próximo passo
 
-Revisão do QA da Etapa 6 e aprovação do dono. Depois, a Etapa 7 (Onboarding, configurações e
-acabamento): primeiro uso (com o pedido de permissão de notificação), tela de Configurações, estados
-vazios, ícone e README final.
+Revisão do QA da Etapa 7 e aprovação do dono. É a última etapa do roteiro do MVP.
