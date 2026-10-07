@@ -1,5 +1,6 @@
 package com.joaobarcelos.financas.data.local
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
@@ -22,7 +23,9 @@ import java.time.LocalDate
         EntradaEntity::class, ContaFixaEntity::class, CategoriaEntity::class, GastoEntity::class,
         MetaReservaEntity::class, CicloFechadoEntity::class, RegistroAlertaEntity::class,
     ],
-    version = 1,
+    version = 2,
+    // Versão 2: índice único no início do ciclo fechado (Etapa 6). A migração é gerada pelo Room.
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
 @TypeConverters(Conversores::class)
 abstract class FinancasDatabase : RoomDatabase() {

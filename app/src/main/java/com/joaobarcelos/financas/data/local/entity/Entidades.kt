@@ -84,7 +84,8 @@ data class MetaReservaEntity(
 fun MetaReservaEntity.paraDominio() = MetaReserva(tipo, valor, ativa, nome, id)
 fun MetaReserva.paraEntidade() = MetaReservaEntity(id, nome, tipo, valor, ativa)
 
-@Entity(tableName = "ciclo_fechado")
+/** O índice único faz o banco recusar o mesmo ciclo fechado duas vezes. */
+@Entity(tableName = "ciclo_fechado", indices = [Index("inicio", unique = true)])
 data class CicloFechadoEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,
     val inicio: LocalDate,

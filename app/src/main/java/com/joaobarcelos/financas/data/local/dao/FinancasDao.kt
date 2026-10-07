@@ -57,7 +57,8 @@ interface FinancasDao {
     )
     suspend fun atualizarGasto(id: Long, descricao: String, valorCentavos: Long, data: LocalDate, categoriaId: Long)
 
-    @Insert
+    /** Devolve -1 quando o ciclo já tinha sido fechado. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun inserir(cicloFechado: CicloFechadoEntity): Long
 
     /** Devolve -1 quando o alerta já está registrado no mesmo período. */

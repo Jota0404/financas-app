@@ -5,6 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.joaobarcelos.financas.data.local.FinancasDatabase
 import com.joaobarcelos.financas.domain.calculadora.Resumo
+import com.joaobarcelos.financas.domain.model.Configuracoes
+import com.joaobarcelos.financas.domain.repository.ConfiguracoesRepository
+import com.joaobarcelos.financas.domain.usecase.Alertas
+import kotlinx.coroutines.flow.flowOf
 import com.joaobarcelos.financas.domain.calculadora.cicloDe
 import com.joaobarcelos.financas.domain.model.CicloFechado
 import com.joaobarcelos.financas.domain.model.ContaFixa
@@ -132,6 +136,36 @@ class RoomRepositoriosTest {
         historico.salvar(CicloFechado(outubro, resumo, reservaInvadida = 7_777))
         assertEquals(10_000, resumo.reservaInvadida)
         assertEquals(7_777, historico.ciclosFechados().first().single().reservaInvadida)
+    }
+
+    @Test
+    fun `o banco recusa fechar o mesmo ciclo duas vezes`() = runTest {
+        salvarCenarioBase()
+        val resumo = orcamento.orcamento().first().resumo(outubro)
+        assertTrue(historico.salvar(CicloFechado(outubro, resumo)) > 0)
+        assertEquals(-1L, historico.salvar(CicloFechado(outubro, resumo)))
+        assertEquals(1, historico.ciclosFechados().first().size)
+    }
+
+    @Test
+    fun `CA11 ciclo fechado de outubro continua com 1000 reais de aluguel depois da edicao no banco`() = runTest {
+        // Fechamento pelo caso de uso, com o banco de verdade
+        salvarCenarioBase()
+        orcamento.salvar(Gasto(1_000, LocalDate.of(2026, 10, 10)))
+        val configuracoes = object : ConfiguracoesRepository {
+            override fun configuracoes() = flowOf(Configuracoes())
+            override suspend fun atualizar(mudanca: (Configuracoes) -> Configuracoes) {}
+        }
+        val alertas = Alertas(orcamento, configuracoes, historico) {}
+        alertas.fecharCiclos(LocalDate.of(2026, 11, 1))
+        // aluguel editado para 1.100,00 em novembro
+        val aluguelSalvo = orcamento.orcamento().first().contas.single { it.descricao == "Aluguel" }
+        orcamento.salvar(aluguelSalvo.copy(valorCentavos = 110_000))
+
+        val fechado = historico.ciclosFechados().first().single()
+        assertEquals(outubro, fechado.ciclo)
+        assertEquals(120_000, fechado.resumo.fixas) // aluguel 1.000 + celular 200
+        assertEquals(130_000, orcamento.orcamento().first().resumo(cicloDe(LocalDate.of(2026, 11, 1), 1)).fixas)
     }
 
     @Test
