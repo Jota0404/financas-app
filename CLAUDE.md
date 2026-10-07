@@ -61,6 +61,8 @@ Pacote base: `com.joaobarcelos.financas`.
 - Testes no aparelho (`connectedDebugAndroidTest`) **desinstalam o app no fim e apagam os dados
   dele**: rodar só no emulador, com `ANDROID_SERIAL=emulator-5554`, nunca com o celular do dono
   conectado. E esses testes usam banco em memória, nunca o banco real do app.
+- Toda entrega abre também o **APK final** (`assembleRelease`) no emulador: o R8 pode quebrar só
+  a versão final, e o CI não roda o app (na Etapa 7, o release fechava ao abrir desde a Etapa 1).
 - Antes de cada push, rodar `/verificar` (build, testes e GitHub Actions). Gradle à mão neste Mac
   precisa de `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
 
