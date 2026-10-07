@@ -1,5 +1,6 @@
 package com.joaobarcelos.financas
 
+import android.Manifest
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -9,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.rule.GrantPermissionRule
 import com.joaobarcelos.financas.domain.model.Categoria
 import com.joaobarcelos.financas.domain.model.ContaFixa
 import com.joaobarcelos.financas.domain.model.Entrada
@@ -37,7 +39,11 @@ class RegistrarGastoTest {
     @get:Rule(order = 0)
     val hilt = HiltAndroidRule(this)
 
+    // Sem isso, o pedido de permissão de notificação abriria por cima do app
     @get:Rule(order = 1)
+    val permissao: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
+
+    @get:Rule(order = 2)
     val tela = createAndroidComposeRule<MainActivity>()
 
     @Inject
