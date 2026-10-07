@@ -104,6 +104,18 @@ class ConfigurarTest {
     }
 
     @Test
+    fun `dia escolhido no primeiro uso comeca no ciclo normal sem ciclo irregular`() = runBlocking {
+        // dia 5 escolhido em 07/10: ciclo de 05/10 a 04/11, e não 01/10 a 04/11 como numa mudança
+        val vazio = Ambiente()
+        val configurarVazio = Configurar(vazio.orcamento, vazio.configuracoes, vazio.alertas) {}
+        assertEquals(Decisao.Permitido, configurarVazio.definirDiaNoPrimeiroUso(5))
+        assertNull(vazio.configuracoes.dados.value.cicloIrregular)
+        assertEquals(Ciclo(data(5, 10), data(4, 11)), vazio.configuracoes.dados.value.cicloAtual(data(7, 10)))
+        assertEquals(bloqueio(ErroCadastro.DIA_PAGAMENTO_INVALIDO), configurarVazio.definirDiaNoPrimeiroUso(0))
+        assertTrue(vazio.historico.fechados.value.isEmpty())
+    }
+
+    @Test
     fun `concluir o primeiro uso grava que ele nao aparece mais`() = runBlocking {
         val vazio = Ambiente()
         val configurarVazio = Configurar(vazio.orcamento, vazio.configuracoes, vazio.alertas) {}

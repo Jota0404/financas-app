@@ -59,6 +59,16 @@ class Configurar(
         return decisao
     }
 
+    /**
+     * Dia do pagamento escolhido no primeiro uso. Não é uma mudança (RN01): ainda não há ciclos, então
+     * o ciclo atual já é o normal do dia escolhido, sem ciclo irregular.
+     */
+    suspend fun definirDiaNoPrimeiroUso(dia: Int): Decisao {
+        val decisao = decidirConfiguracoes(Configuracoes(diaPagamento = dia))
+        if (decisao == Decisao.Permitido) configuracoes.atualizar { it.copy(diaPagamento = dia, cicloIrregular = null) }
+        return decisao
+    }
+
     /** Fim do assistente de primeiro uso, concluído ou pulado. */
     suspend fun concluirPrimeiroUso() = configuracoes.atualizar { it.copy(primeiroUsoConcluido = true) }
 
