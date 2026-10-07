@@ -2,8 +2,8 @@
 
 Atualizado em 06/10/2026.
 
-**Etapa atual:** 4 de 7 (Cadastros) concluída e aprovada pelo dono. A próxima é a Etapa 5
-(Gastos e Início).
+**Etapa atual:** 5 de 7 (Gastos e Início) concluída e entregue ao QA. Aguarda a revisão do QA e a
+aprovação do dono antes da Etapa 6.
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -15,7 +15,7 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | 2. Domínio (só Kotlin puro, RN01 a RN15) | ✅ Concluída e aprovada em 05/10/2026 |
 | 3. Persistência (Room, DAOs, DataStore) | ✅ Concluída e aprovada em 06/10/2026 |
 | 4. Cadastros | ✅ Concluída e aprovada em 06/10/2026 |
-| 5. Gastos e Início | ⏭️ Próxima |
+| 5. Gastos e Início | 🔍 Concluída em 06/10/2026, aguardando QA e aprovação |
 | 6. Alertas e fechamento de ciclo | ⏳ Não iniciada |
 | 7. Onboarding, configurações e acabamento | ⏳ Não iniciada |
 
@@ -99,6 +99,25 @@ em + para adicionar."
 (aluguel, celular de 3 meses, salário e reserva de 10%); a meta de R$ 2.000,00 foi bloqueada com
 "faltam R$ 500,00"; nenhum travamento no log.
 
+## O que já existe (Etapa 5)
+
+O app já faz o ciclo principal: cadastrar, registrar gastos e ver quanto pode gastar.
+
+| Tela | O que faz |
+| --- | --- |
+| Início (tela 2) | Disponível da semana em destaque e o limite com as datas da semana. Barra de consumo verde, amarela ou vermelha, nos mesmos pontos dos alertas A2 e A3 (padrão 70% e 90%). Disponível do ciclo, valor protegido na reserva e reserva invadida. Com limite zero, a barra fica cheia e explica que o disponível do ciclo acabou. Botão "+" para novo gasto |
+| Novo gasto (tela 3) | O teclado numérico abre direto no valor; data padrão hoje; categoria padrão Outros; descrição opcional. Registrar leva 2 toques ("+" e "Salvar", CA12). Um gasto que invade a reserva é salvo, e o app avisa na hora (RN09) |
+| Histórico (tela 7) | Gastos do ciclo atual agrupados por dia, com o total de cada dia. Tocar num gasto corrige ou exclui, com a RN14 e a RN15 também na edição. Avulsas de ciclos fechados aparecem só para consulta (P18). Os ciclos fechados aparecem a partir da Etapa 6 |
+
+O painel do Início é calculado num lugar só, no domínio (`calculadora/Painel.kt`), e as decisões de
+gasto também (`decidirGasto` e `decidirExclusao` em `usecase/Cadastros.kt`). A data de hoje se
+atualiza sozinha na virada do dia, com o app aberto ou ao voltar para ele.
+
+**Visto no emulador (Android 17):** com o cenário base, o Início mostrou R$ 388,88 na semana de
+05/10 a 11/10 (CA05), R$ 1.500,00 no ciclo (CA01) e R$ 300,00 na reserva; o teclado abriu direto no
+valor; um gasto de R$ 45,00 em 2 toques; e, com mais R$ 1.555,00 (total de R$ 1.600,00), o aviso
+"a reserva deste ciclo está invadida em R$ 100,00" (CA03). Temas claro e escuro sem travamentos.
+
 ## Versões principais
 
 | Item | Versão |
@@ -119,18 +138,18 @@ em + para adicionar."
 
 ## Testes
 
-- **Domínio:** 106 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
+- **Domínio:** 122 testes unitários, todos passando, em `domain/src/test/kotlin/.../domain/`. Cada
   RN de RN01 a RN15 tem teste com o código no nome, e os critérios CA01 a CA07, CA09, CA10 e
   CA13 a CA16 estão em `CriteriosDeAceiteTest.kt`, com o cenário base do briefing
   (`CenarioBase.kt`) e os valores exatos em centavos.
-- **App:** 26 testes em `app/src/test/`: 17 de persistência (banco, repositórios e DataStore) e 9
-  de tela da aba Cadastros (estados vazios, parcela, CA04 bloqueado na tela, aviso da RN08,
-  encerrar e excluir conta, RN15). Rodam no computador com Robolectric, sem aparelho, e por isso
-  também no GitHub Actions.
-- **No aparelho:** 1 teste instrumentado (`BackupTest`, RN16). Ele roda no emulador, com
-  `./gradlew connectedDebugAndroidTest`, e não roda no GitHub Actions, porque precisa de um aparelho.
-- **Ainda sem teste, como previsto:** CA08 e CA11 (Etapa 6, alertas e fechamento de ciclo) e CA12
-  (Etapa 5, telas).
+- **App:** 44 testes em `app/src/test/`: 17 de persistência (banco, repositórios e DataStore), 14 de
+  tela da aba Cadastros, 11 das telas Início, Novo gasto e Histórico (entre eles o CA12 e o CA03) e 2
+  da virada do dia. Rodam no computador com Robolectric, sem aparelho, e por isso também no GitHub
+  Actions.
+- **No aparelho:** 2 testes instrumentados, `BackupTest` (RN16) e `RegistrarGastoTest` (CA12, com o
+  app de verdade). Rodam no emulador com `./gradlew connectedDebugAndroidTest` e não rodam no GitHub
+  Actions, porque precisam de um aparelho.
+- **Ainda sem teste, como previsto:** CA08 e CA11 (Etapa 6, alertas e fechamento de ciclo).
 
 ## Pendências e observações
 
@@ -176,19 +195,22 @@ em + para adicionar."
   aceita datas do ciclo atual até hoje (como a RN14); só se exclui conta que começa no ciclo atual;
   sem meta ativa, salvar conta ou entrada não avisa (RN08).
 - Revisão do QA da Etapa 4 ([`qa/2026-10-06-etapa-4.md`](qa/2026-10-06-etapa-4.md)): aprovada com
-  ressalvas, sem itens Críticos ou Altos. Ficam para o começo da Etapa 5: M1 (editar a duração de
-  uma conta antiga a tirava do ciclo atual, contornando a P17), M2 (centavos com ponto, como
-  "1500.50", não eram aceitos), B1 (girar o celular fechava o formulário) e B3 (descrição do botão
-  + para leitor de tela). O B2 (data de hoje com o app aberto na virada do dia) entra junto com a
-  tela Início. Decisão do dono sobre a P18, registrada no briefing: a lista de Entradas mostra só as
+  ressalvas, sem itens Críticos ou Altos. Corrigidos no começo da Etapa 5: M1 (editar a duração de
+  uma conta antiga não pode tirá-la do ciclo atual: "Para tirar a conta deste ciclo, encerre"), M2
+  ("1500.50" é aceito, e texto que não é número tem mensagem própria), B1 (formulários sobrevivem a
+  girar o celular), B2 (o dia de hoje se atualiza sozinho) e B3 (o + diz o que adiciona). Decisão do dono sobre a P18, registrada no briefing: a lista de Entradas mostra só as
   avulsas do ciclo atual; as de ciclos fechados aparecem no Histórico, só para consulta (resolve o B4).
+- Decisões do dono no começo da Etapa 5, registradas no briefing: gastos são corrigidos e excluídos
+  tocando no Histórico; com limite zero, a barra fica cheia e vermelha com explicação; o gasto que
+  invade a reserva avisa na hora; as cores da barra seguem os percentuais dos alertas; no CA12,
+  digitar o valor não conta como toque.
 - Atalhos do Ponytail: `FinancasDao.kt:30` carrega os gastos de todos os ciclos (filtrar por data
-  se o histórico pesar); `FolegoApp.kt:70` mostra "em breve" nas abas que ainda não existem (sai
-  quando cada tela chegar).
+  se o histórico pesar); `FolegoApp.kt:69` mostra "em breve" no lugar das Configurações (sai na
+  Etapa 7).
 - O GitHub avisou que o runner `ubuntu-latest` passa para o Ubuntu 26 a partir de 19/10/2026.
   Não exige ação agora: vale conferir se os testes continuam passando depois dessa data.
 
 ## Próximo passo
 
-Etapa 5 (Gastos e Início): primeiro, as correções da revisão do QA da Etapa 4 e a P18. Depois, a
-tela inicial com o disponível da semana, novo gasto em até 3 toques (CA12) e histórico.
+Revisão do QA da Etapa 5 e aprovação do dono. Depois, a Etapa 6 (Alertas e fechamento de ciclo):
+WorkManager, notificações A1 a A5, RegistroAlerta e geração do CicloFechado (CA08 e CA11).

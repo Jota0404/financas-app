@@ -48,7 +48,8 @@ financas-app/
 │   └── ui/                    testes de tela (Robolectric, sem aparelho)
 ├── app/schemas/               esquema do banco a cada versão, base para as migrações do Room
 ├── app/src/androidTest/java/com/joaobarcelos/financas/
-│   └── BackupTest.kt          teste no aparelho: backup automático ligado (RN16)
+│   ├── BackupTest.kt          teste no aparelho: backup automático ligado (RN16)
+│   └── RegistrarGastoTest.kt  teste no aparelho: registrar gasto em até 3 toques (CA12)
 ├── domain/                    módulo :domain, regras de negócio em Kotlin puro (sem Android)
 │   ├── src/main/kotlin/com/joaobarcelos/financas/domain/
 │   │   ├── model/             modelos do domínio (Entrada, ContaFixa, Gasto...)
