@@ -1,6 +1,6 @@
 # Briefing — Fôlego, app de finanças pessoais (Android)
 
-Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17) e sobre as dúvidas de tela do início da Etapa 4 (cadastro de parcelas, data das entradas quando excluir uma conta fixa e o aviso da RN08 sem metas).
+Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17) e sobre as dúvidas de tela do início da Etapa 4 (cadastro de parcelas, data das entradas quando excluir uma conta fixa e o aviso da RN08 sem metas) e sobre a revisão de QA da Etapa 4 (`docs/qa/2026-10-06-etapa-4.md`, P18).
 
 ## Visão geral
 
@@ -174,9 +174,9 @@ Oito telas, com navegação inferior em quatro abas: Início, Histórico, Cadast
 2. **Início** — em destaque, o disponível da semana. Abaixo, uma barra de consumo (verde até 70%, amarela até 90%, vermelha acima), o disponível do ciclo e o valor protegido na reserva. Botão flutuante "+" para novo gasto.
 3. **Novo gasto** — valor, descrição, categoria e data (padrão: hoje). O teclado numérico abre direto no campo valor.
 4. **Contas fixas** — lista com valor, vencimento e progresso ("parcela 3 de 10" ou "sem fim").
-5. **Entradas** — recorrentes e avulsas, separadas.
+5. **Entradas** — recorrentes e avulsas, separadas. A lista mostra as recorrentes e as avulsas do ciclo atual. Avulsas de ciclos fechados aparecem só no Histórico e não podem ser editadas nem excluídas.
 6. **Metas de reserva** — lista de metas com o valor efetivo no ciclo atual.
-7. **Histórico** — gastos do ciclo atual agrupados por dia e, abaixo, os ciclos fechados com seus totais e a marca de reserva invadida.
+7. **Histórico** — gastos do ciclo atual agrupados por dia e, abaixo, os ciclos fechados com seus totais e a marca de reserva invadida. As entradas avulsas de ciclos fechados aparecem aqui, só para consulta.
 8. **Configurações** — dia do pagamento, limite manual, percentuais e horário dos alertas.
 
 As telas 4, 5 e 6 ficam dentro da aba Cadastros. Toda tela de lista tem estado vazio com orientação ("Nenhuma conta fixa ainda. Toque em + para adicionar").

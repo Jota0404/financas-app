@@ -2,8 +2,8 @@
 
 Atualizado em 06/10/2026.
 
-**Etapa atual:** 4 de 7 (Cadastros) concluída e entregue ao QA. Aguarda a revisão do QA e a
-aprovação do dono antes da Etapa 5.
+**Etapa atual:** 4 de 7 (Cadastros) concluída e aprovada pelo dono. A próxima é a Etapa 5
+(Gastos e Início).
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -14,8 +14,8 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | 1. Setup | ✅ Concluída e aprovada em 05/10/2026 |
 | 2. Domínio (só Kotlin puro, RN01 a RN15) | ✅ Concluída e aprovada em 05/10/2026 |
 | 3. Persistência (Room, DAOs, DataStore) | ✅ Concluída e aprovada em 06/10/2026 |
-| 4. Cadastros | 🔍 Concluída em 06/10/2026, aguardando QA e aprovação |
-| 5. Gastos e Início | ⏳ Não iniciada |
+| 4. Cadastros | ✅ Concluída e aprovada em 06/10/2026 |
+| 5. Gastos e Início | ⏭️ Próxima |
 | 6. Alertas e fechamento de ciclo | ⏳ Não iniciada |
 | 7. Onboarding, configurações e acabamento | ⏳ Não iniciada |
 
@@ -175,6 +175,13 @@ em + para adicionar."
   parcela do ciclo atual; entrada recorrente vem com o início do ciclo atual; entrada avulsa só
   aceita datas do ciclo atual até hoje (como a RN14); só se exclui conta que começa no ciclo atual;
   sem meta ativa, salvar conta ou entrada não avisa (RN08).
+- Revisão do QA da Etapa 4 ([`qa/2026-10-06-etapa-4.md`](qa/2026-10-06-etapa-4.md)): aprovada com
+  ressalvas, sem itens Críticos ou Altos. Ficam para o começo da Etapa 5: M1 (editar a duração de
+  uma conta antiga a tirava do ciclo atual, contornando a P17), M2 (centavos com ponto, como
+  "1500.50", não eram aceitos), B1 (girar o celular fechava o formulário) e B3 (descrição do botão
+  + para leitor de tela). O B2 (data de hoje com o app aberto na virada do dia) entra junto com a
+  tela Início. Decisão do dono sobre a P18, registrada no briefing: a lista de Entradas mostra só as
+  avulsas do ciclo atual; as de ciclos fechados aparecem no Histórico, só para consulta (resolve o B4).
 - Atalhos do Ponytail: `FinancasDao.kt:30` carrega os gastos de todos os ciclos (filtrar por data
   se o histórico pesar); `FolegoApp.kt:70` mostra "em breve" nas abas que ainda não existem (sai
   quando cada tela chegar).
@@ -183,5 +190,5 @@ em + para adicionar."
 
 ## Próximo passo
 
-Revisão do QA da Etapa 4 e aprovação do dono. Depois, a Etapa 5 (Gastos e Início): tela inicial
-com o disponível da semana, novo gasto em até 3 toques (CA12) e histórico.
+Etapa 5 (Gastos e Início): primeiro, as correções da revisão do QA da Etapa 4 e a P18. Depois, a
+tela inicial com o disponível da semana, novo gasto em até 3 toques (CA12) e histórico.
