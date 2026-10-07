@@ -44,6 +44,9 @@ android {
         // O Robolectric simula o Android 16+ acessando uma parte interna do Java
         unitTests.all { it.jvmArgs("--add-opens=java.base/jdk.internal.access=ALL-UNNAMED") }
     }
+    // Os esquemas do banco servem de base para o teste da migração. Os testes com Robolectric leem os
+    // arquivos da versão debug; a versão de publicação (release) não leva os esquemas.
+    sourceSets.getByName("debug").assets.directories.add("$projectDir/schemas")
 }
 
 room {
@@ -68,11 +71,16 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+    testImplementation(libs.androidx.work.testing)
+    testImplementation(libs.androidx.room.testing)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
     // O Compose traz o Espresso 3.5, que não funciona com o Android 17 simulado pelo Robolectric
@@ -81,6 +89,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.androidx.test.rules)
     kspAndroidTest(libs.hilt.compiler)
     // O Compose traz o Espresso 3.5, que não funciona no Android 17
     androidTestImplementation(libs.androidx.test.espresso.core)
