@@ -2,8 +2,8 @@
 
 Atualizado em 06/10/2026.
 
-**Etapa atual:** 5 de 7 (Gastos e Início) concluída e entregue ao QA. Aguarda a revisão do QA e a
-aprovação do dono antes da Etapa 6.
+**Etapa atual:** 5 de 7 (Gastos e Início) concluída e aprovada pelo dono. A próxima é a Etapa 6
+(Alertas e fechamento de ciclo).
 
 A especificação completa está em [`briefing.md`](briefing.md). Este arquivo só registra até onde o projeto chegou.
 
@@ -15,8 +15,8 @@ A especificação completa está em [`briefing.md`](briefing.md). Este arquivo s
 | 2. Domínio (só Kotlin puro, RN01 a RN15) | ✅ Concluída e aprovada em 05/10/2026 |
 | 3. Persistência (Room, DAOs, DataStore) | ✅ Concluída e aprovada em 06/10/2026 |
 | 4. Cadastros | ✅ Concluída e aprovada em 06/10/2026 |
-| 5. Gastos e Início | 🔍 Concluída em 06/10/2026, aguardando QA e aprovação |
-| 6. Alertas e fechamento de ciclo | ⏳ Não iniciada |
+| 5. Gastos e Início | ✅ Concluída e aprovada em 06/10/2026 |
+| 6. Alertas e fechamento de ciclo | ⏭️ Próxima |
 | 7. Onboarding, configurações e acabamento | ⏳ Não iniciada |
 
 ## O que já existe (Etapa 1)
@@ -147,8 +147,9 @@ valor; um gasto de R$ 45,00 em 2 toques; e, com mais R$ 1.555,00 (total de R$ 1.
   da virada do dia. Rodam no computador com Robolectric, sem aparelho, e por isso também no GitHub
   Actions.
 - **No aparelho:** 2 testes instrumentados, `BackupTest` (RN16) e `RegistrarGastoTest` (CA12, com o
-  app de verdade). Rodam no emulador com `./gradlew connectedDebugAndroidTest` e não rodam no GitHub
-  Actions, porque precisam de um aparelho.
+  app de verdade). Rodam **só no emulador**, com
+  `ANDROID_SERIAL=emulator-5554 ./gradlew connectedDebugAndroidTest`, porque o comando desinstala o
+  app no fim e apaga os dados dele. Não rodam no GitHub Actions, porque precisam de um aparelho.
 - **Ainda sem teste, como previsto:** CA08 e CA11 (Etapa 6, alertas e fechamento de ciclo).
 
 ## Pendências e observações
@@ -204,6 +205,13 @@ valor; um gasto de R$ 45,00 em 2 toques; e, com mais R$ 1.555,00 (total de R$ 1.
   tocando no Histórico; com limite zero, a barra fica cheia e vermelha com explicação; o gasto que
   invade a reserva avisa na hora; as cores da barra seguem os percentuais dos alertas; no CA12,
   digitar o valor não conta como toque.
+- Revisão do QA da Etapa 5 ([`qa/2026-10-06-etapa-5.md`](qa/2026-10-06-etapa-5.md)): aprovada com
+  ressalvas, sem itens Críticos ou Altos. **Atenção:** `connectedDebugAndroidTest` desinstala o app
+  no fim e apaga os dados dele. Rodar só no emulador:
+  `ANDROID_SERIAL=emulator-5554 ./gradlew connectedDebugAndroidTest`, nunca com o celular do dono
+  conectado. Ficam para o começo da Etapa 6: M1 (o teste do CA12 passa a usar banco em memória) e
+  B2 (fechar também os ciclos que terminaram antes da Etapa 6). O B1 (barra vermelha no primeiro
+  uso, sem cadastros) fica para a Etapa 6 ou para o onboarding da Etapa 7.
 - Atalhos do Ponytail: `FinancasDao.kt:30` carrega os gastos de todos os ciclos (filtrar por data
   se o histórico pesar); `FolegoApp.kt:69` mostra "em breve" no lugar das Configurações (sai na
   Etapa 7).
@@ -212,5 +220,5 @@ valor; um gasto de R$ 45,00 em 2 toques; e, com mais R$ 1.555,00 (total de R$ 1.
 
 ## Próximo passo
 
-Revisão do QA da Etapa 5 e aprovação do dono. Depois, a Etapa 6 (Alertas e fechamento de ciclo):
-WorkManager, notificações A1 a A5, RegistroAlerta e geração do CicloFechado (CA08 e CA11).
+Etapa 6 (Alertas e fechamento de ciclo): primeiro, as correções da revisão do QA da Etapa 5.
+Depois, WorkManager, notificações A1 a A5, RegistroAlerta e geração do CicloFechado (CA08 e CA11).
