@@ -1,6 +1,6 @@
 # Briefing — Fôlego, app de finanças pessoais (Android)
 
-Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17) e sobre as dúvidas de tela do início da Etapa 4 (cadastro de parcelas, data das entradas quando excluir uma conta fixa e o aviso da RN08 sem metas) e sobre a revisão de QA da Etapa 4 (`docs/qa/2026-10-06-etapa-4.md`, P18) e sobre as dúvidas de tela do início da Etapa 5 (editar gastos, barra com limite zero, aviso de reserva invadida, cores da barra e o que conta como toque no CA12) e sobre os alertas e o fechamento de ciclo do início da Etapa 6 e sobre a revisão de QA da Etapa 6 (`docs/qa/2026-10-07-etapa-6.md`, P19).
+Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17) e sobre as dúvidas de tela do início da Etapa 4 (cadastro de parcelas, data das entradas quando excluir uma conta fixa e o aviso da RN08 sem metas) e sobre a revisão de QA da Etapa 4 (`docs/qa/2026-10-06-etapa-4.md`, P18) e sobre as dúvidas de tela do início da Etapa 5 (editar gastos, barra com limite zero, aviso de reserva invadida, cores da barra e o que conta como toque no CA12) e sobre os alertas e o fechamento de ciclo do início da Etapa 6 e sobre a revisão de QA da Etapa 6 (`docs/qa/2026-10-07-etapa-6.md`, P19) e sobre as dúvidas do início da Etapa 7 (onboarding, ícone, chave de assinatura, APK e percentuais).
 
 ## Visão geral
 
@@ -183,14 +183,14 @@ Os testes do domínio ficam em `domain/src/test/kotlin/.../financas/domain/`.
 
 Oito telas, com navegação inferior em quatro abas: Início, Histórico, Cadastros e Configurações. O fluxo mais usado, registrar um gasto, precisa caber em até 3 toques a partir da tela inicial.
 
-1. **Primeiro uso (onboarding)** — assistente em passos: dia do pagamento, salário, contas fixas, metas de reserva e pedido de permissão de notificação. Só aparece uma vez.
+1. **Primeiro uso (onboarding)** — assistente em passos: dia do pagamento, salário, contas fixas, metas de reserva e pedido de permissão de notificação. Só aparece uma vez. O dia do pagamento vem com o dia 1, e os outros passos podem ser pulados (cadastra-se depois, em Cadastros). O assistente aparece até ser concluído; quem já tem entradas cadastradas não o vê.
 2. **Início** — em destaque, o disponível da semana. Abaixo, uma barra de consumo (verde até 70%, amarela até 90%, vermelha acima; os dois pontos seguem os percentuais de atenção e crítico dos alertas A2 e A3, que são configuráveis), o disponível do ciclo e o valor protegido na reserva. Botão flutuante "+" para novo gasto. Quando o limite da semana é R$ 0,00, a barra aparece cheia e vermelha, com o texto "Sem limite nesta semana: o disponível do ciclo acabou".
 3. **Novo gasto** — valor, descrição, categoria e data (padrão: hoje). O teclado numérico abre direto no campo valor. Um gasto que invade a reserva é salvo (RN09), e o app avisa na hora quanto a reserva do ciclo está invadida; a notificação A4 vem além disso.
 4. **Contas fixas** — lista com valor, vencimento e progresso ("parcela 3 de 10" ou "sem fim").
 5. **Entradas** — recorrentes e avulsas, separadas. A lista mostra as recorrentes e as avulsas do ciclo atual. Avulsas de ciclos fechados aparecem só no Histórico e não podem ser editadas nem excluídas.
 6. **Metas de reserva** — lista de metas com o valor efetivo no ciclo atual.
 7. **Histórico** — gastos do ciclo atual agrupados por dia e, abaixo, os ciclos fechados com seus totais e a marca de reserva invadida. As entradas avulsas de ciclos fechados aparecem aqui, só para consulta. Tocar num gasto do ciclo atual abre o mesmo formulário do novo gasto, para corrigir ou excluir; a RN14 e a RN15 valem também na edição. Gastos de ciclos fechados não podem ser mudados.
-8. **Configurações** — dia do pagamento, limite manual, percentuais e horário dos alertas.
+8. **Configurações** — dia do pagamento, limite manual, percentuais e horário dos alertas. O percentual de atenção vai de 1% a 99%, o crítico de 2% a 100%, e a atenção precisa ser menor que o crítico. Mudar o dia do pagamento segue a RN01, e mudar o horário reagenda os alertas.
 
 As telas 4, 5 e 6 ficam dentro da aba Cadastros. Toda tela de lista tem estado vazio com orientação ("Nenhuma conta fixa ainda. Toque em + para adicionar").
 
@@ -207,7 +207,7 @@ Sete etapas, e cada uma termina numa entrega ao QA. A regra de ouro: **os cálcu
 4. **Cadastros** — telas de contas fixas, entradas e metas de reserva, com seus ViewModels.
 5. **Gastos e Início** — tela inicial, novo gasto e histórico.
 6. **Alertas e fechamento de ciclo** — WorkManager, notificações A1 a A5, RegistroAlerta e geração do CicloFechado.
-7. **Onboarding, configurações e acabamento** — primeiro uso, estados vazios, ícone e README final com prints e APK de release.
+7. **Onboarding, configurações e acabamento** — primeiro uso, estados vazios, ícone e README final com prints e APK de release. O ícone é "respiro": três ondas de vento brancas sobre fundo verde, e o verde é a cor do app nos celulares sem cor dinâmica. A chave de assinatura e a senha ficam no Mac do dono, fora do Git; o APK final é gerado no Mac e não é publicado.
 
 Não avance de etapa com bug crítico aberto pelo QA na etapa anterior.
 
