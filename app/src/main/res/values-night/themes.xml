@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- No modo escuro, a janela já abre escura: sem clarão branco antes do app (QA Etapa 1, B3) -->
+    <style name="Theme.Financas" parent="android:Theme.Material.NoActionBar" />
+</resources>
