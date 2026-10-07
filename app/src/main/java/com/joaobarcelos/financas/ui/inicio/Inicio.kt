@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -86,7 +87,8 @@ fun InicioTela(
     val estado by vm.estado.collectAsStateWithLifecycle()
     var novoGasto by rememberSaveable { mutableStateOf(false) }
     Box(Modifier.fillMaxSize()) {
-        estado?.let { Painel(it, aoIrParaCadastros) }
+        // No primeiro uso o banco leva alguns segundos para ser criado
+        estado?.let { Painel(it, aoIrParaCadastros) } ?: CircularProgressIndicator(Modifier.align(Alignment.Center))
         FloatingActionButton(onClick = { novoGasto = true }, modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
             Icon(Icons.Filled.Add, contentDescription = "Novo gasto")
         }
