@@ -1,6 +1,6 @@
 # Briefing — Fôlego, app de finanças pessoais (Android)
 
-Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17) e sobre as dúvidas de tela do início da Etapa 4 (cadastro de parcelas, data das entradas quando excluir uma conta fixa e o aviso da RN08 sem metas) e sobre a revisão de QA da Etapa 4 (`docs/qa/2026-10-06-etapa-4.md`, P18) e sobre as dúvidas de tela do início da Etapa 5 (editar gastos, barra com limite zero e aviso de reserva invadida).
+Versão de 05/10/2026, com as decisões do dono sobre a revisão de QA da Etapa 1 (`docs/qa/2026-10-05-etapa-1.md`, P1 a P10) sobre o limite manual em semana partida (RN12) sobre as dúvidas de cálculo do início da Etapa 2 (RN01, RN03 e RN04) e sobre a revisão de QA da Etapa 2 (`docs/qa/2026-10-05-etapa-2.md`, P12 a P16) e sobre a revisão de QA da Etapa 3 (`docs/qa/2026-10-06-etapa-3.md`, P17) e sobre as dúvidas de tela do início da Etapa 4 (cadastro de parcelas, data das entradas quando excluir uma conta fixa e o aviso da RN08 sem metas) e sobre a revisão de QA da Etapa 4 (`docs/qa/2026-10-06-etapa-4.md`, P18) e sobre as dúvidas de tela do início da Etapa 5 (editar gastos, barra com limite zero, aviso de reserva invadida, cores da barra e o que conta como toque no CA12).
 
 ## Visão geral
 
@@ -171,7 +171,7 @@ Os testes do domínio ficam em `domain/src/test/kotlin/.../financas/domain/`.
 Oito telas, com navegação inferior em quatro abas: Início, Histórico, Cadastros e Configurações. O fluxo mais usado, registrar um gasto, precisa caber em até 3 toques a partir da tela inicial.
 
 1. **Primeiro uso (onboarding)** — assistente em passos: dia do pagamento, salário, contas fixas, metas de reserva e pedido de permissão de notificação. Só aparece uma vez.
-2. **Início** — em destaque, o disponível da semana. Abaixo, uma barra de consumo (verde até 70%, amarela até 90%, vermelha acima), o disponível do ciclo e o valor protegido na reserva. Botão flutuante "+" para novo gasto. Quando o limite da semana é R$ 0,00, a barra aparece cheia e vermelha, com o texto "Sem limite nesta semana: o disponível do ciclo acabou".
+2. **Início** — em destaque, o disponível da semana. Abaixo, uma barra de consumo (verde até 70%, amarela até 90%, vermelha acima; os dois pontos seguem os percentuais de atenção e crítico dos alertas A2 e A3, que são configuráveis), o disponível do ciclo e o valor protegido na reserva. Botão flutuante "+" para novo gasto. Quando o limite da semana é R$ 0,00, a barra aparece cheia e vermelha, com o texto "Sem limite nesta semana: o disponível do ciclo acabou".
 3. **Novo gasto** — valor, descrição, categoria e data (padrão: hoje). O teclado numérico abre direto no campo valor. Um gasto que invade a reserva é salvo (RN09), e o app avisa na hora quanto a reserva do ciclo está invadida; a notificação A4 vem além disso.
 4. **Contas fixas** — lista com valor, vencimento e progresso ("parcela 3 de 10" ou "sem fim").
 5. **Entradas** — recorrentes e avulsas, separadas. A lista mostra as recorrentes e as avulsas do ciclo atual. Avulsas de ciclos fechados aparecem só no Histórico e não podem ser editadas nem excluídas.
@@ -217,7 +217,7 @@ Os casos usam o mesmo cenário base, salvo quando a situação diz outra coisa. 
 | CA09 | RN15 | Gasto de R$ 0,00 | Salvamento bloqueado |
 | CA10 | RN14 | Gasto com data em ciclo já fechado | Salvamento bloqueado |
 | CA11 | RN05 | Aluguel editado para R$ 1.100,00 em novembro | CicloFechado de outubro continua com R$ 1.000,00 de aluguel |
-| CA12 | Telas | Registrar gasto a partir do Início | No máximo 3 toques (categoria padrão: Outros) |
+| CA12 | Telas | Registrar gasto a partir do Início | No máximo 3 toques (categoria padrão: Outros); digitar o valor não conta como toque |
 | CA13 | RN11 | Quinta, 01/10/2026 (primeiro dia do ciclo), sem gastos | Limite de 01 a 04/10 = R$ 193,54 (R$ 1.500,00 × 4 ÷ 31) |
 | CA14 | RN11 | Segunda, 05/10/2026, com o gasto do CA03 feito entre 01 e 04/10 (disponível −R$ 100,00) | Limite semanal = R$ 0,00 |
 | CA15 | RN13 | Salário de R$ 3.000,05 com a meta de 10% | Reserva = R$ 300,01 (arredonda para cima) |
