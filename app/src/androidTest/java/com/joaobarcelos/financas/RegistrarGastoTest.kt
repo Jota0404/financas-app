@@ -5,11 +5,12 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.core.app.ActivityScenario
 import androidx.test.rule.GrantPermissionRule
 import com.joaobarcelos.financas.domain.model.Categoria
 import com.joaobarcelos.financas.domain.model.ContaFixa
@@ -43,8 +44,9 @@ class RegistrarGastoTest {
     @get:Rule(order = 1)
     val permissao: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 
+    // O app só abre depois do cenário montado: com o banco vazio, apareceria o assistente de primeiro uso
     @get:Rule(order = 2)
-    val tela = createAndroidComposeRule<MainActivity>()
+    val tela = createEmptyComposeRule()
 
     @Inject
     lateinit var orcamento: OrcamentoRepository
@@ -57,6 +59,7 @@ class RegistrarGastoTest {
         orcamento.salvar(Entrada(300_000, TipoEntrada.RECORRENTE, inicio, descricao = "Salário"))
         orcamento.salvar(ContaFixa(100_000, inicio, descricao = "Aluguel", diaVencimento = 5))
         orcamento.salvar(MetaReserva(TipoMeta.PERCENTUAL, 1000, nome = "Reserva"))
+        ActivityScenario.launch(MainActivity::class.java)
         Unit
     }
 

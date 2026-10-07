@@ -14,8 +14,11 @@ import com.joaobarcelos.financas.domain.repository.HistoricoRepository
 import com.joaobarcelos.financas.domain.repository.OrcamentoRepository
 import com.joaobarcelos.financas.domain.usecase.Alertas
 import com.joaobarcelos.financas.domain.usecase.Cadastros
+import com.joaobarcelos.financas.domain.usecase.Configurar
 import com.joaobarcelos.financas.domain.usecase.Notificador
+import androidx.work.ExistingWorkPolicy
 import com.joaobarcelos.financas.worker.NotificacoesAndroid
+import com.joaobarcelos.financas.worker.agendarRotinaDiaria
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -48,6 +51,18 @@ abstract class DadosModule {
             historico: HistoricoRepository,
             notificador: Notificador,
         ) = Alertas(orcamento, configuracoes, historico, notificador)
+
+        @Provides
+        fun configurar(
+            @ApplicationContext context: Context,
+            orcamento: OrcamentoRepository,
+            configuracoes: ConfiguracoesRepository,
+            alertas: Alertas,
+            relogio: Clock,
+        ) = Configurar(orcamento, configuracoes, alertas) {
+            // Horário novo: a rotina já agendada é trocada pela do novo horário
+            agendarRotinaDiaria(context, it, relogio, ExistingWorkPolicy.REPLACE)
+        }
 
         @Provides
         fun cadastros(orcamento: OrcamentoRepository, configuracoes: ConfiguracoesRepository, alertas: Alertas) =

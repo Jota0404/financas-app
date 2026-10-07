@@ -1,9 +1,6 @@
 package com.joaobarcelos.financas.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -11,7 +8,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -21,12 +17,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joaobarcelos.financas.ui.cadastros.CadastrosTela
+import com.joaobarcelos.financas.ui.configuracoes.ConfiguracoesTela
+import com.joaobarcelos.financas.ui.onboarding.PrimeiroUsoTela
+import com.joaobarcelos.financas.ui.onboarding.PrimeiroUsoViewModel
 import com.joaobarcelos.financas.ui.historico.HistoricoTela
 import com.joaobarcelos.financas.ui.inicio.InicioTela
 
@@ -37,9 +35,14 @@ enum class Aba(val titulo: String, val icone: ImageVector) {
     CONFIGURACOES("Configurações", Icons.Filled.Settings),
 }
 
-/** As quatro abas da navegação inferior do briefing. */
+/** O assistente de primeiro uso (tela 1) ou as quatro abas da navegação inferior do briefing. */
 @Composable
-fun FolegoApp() {
+fun FolegoApp(primeiroUso: PrimeiroUsoViewModel = hiltViewModel()) {
+    when (primeiroUso.mostrar.collectAsStateWithLifecycle().value) {
+        null -> return // carregando
+        true -> return PrimeiroUsoTela(primeiroUso)
+        false -> Unit
+    }
     var aba by rememberSaveable { mutableStateOf(Aba.INICIO) }
     Scaffold(
         bottomBar = {
@@ -60,20 +63,8 @@ fun FolegoApp() {
                 Aba.INICIO -> InicioTela(aoIrParaCadastros = { aba = Aba.CADASTROS })
                 Aba.HISTORICO -> HistoricoTela()
                 Aba.CADASTROS -> CadastrosTela()
-                Aba.CONFIGURACOES -> EmBreve("As configurações chegam na Etapa 7.")
+                Aba.CONFIGURACOES -> ConfiguracoesTela()
             }
         }
-    }
-}
-
-// ponytail: aviso de "em breve" no lugar das Configurações; sai na Etapa 7
-@Composable
-private fun EmBreve(texto: String) {
-    Column(
-        Modifier.fillMaxSize().padding(32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(texto, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
     }
 }
